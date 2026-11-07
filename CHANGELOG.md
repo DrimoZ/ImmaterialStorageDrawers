@@ -5,8 +5,9 @@
 ### Added
 - Energy Drawer: stores 500,000 FE, exposed to cables on every side. Crafted from smooth stone,
   redstone blocks and any Storage Drawers drawer; listed in the Storage Drawers creative tab. Built
-  on Storage Drawers' own drawer shape and controller stone textures (the front is a placeholder
-  until the energy display exists).
+  in Storage Drawers' style (controller stone, 1 px trim rim) around a deep niche where an energy
+  cube turns: its core glows and spins faster as the drawer fills. The amount (stored / capacity)
+  is written under it.
 - A broken Energy Drawer keeps its energy and upgrades in the dropped item and gets them back when
   placed. An empty one drops a plain item that stacks. Its tooltip shows the energy and the number
   of upgrades it holds.

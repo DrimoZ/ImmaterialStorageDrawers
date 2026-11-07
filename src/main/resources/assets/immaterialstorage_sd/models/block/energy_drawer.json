@@ -1,9 +1,65 @@
 {
-  "parent": "storagedrawers:block/drawer_orientable",
+  "__comment": "Storage Drawers' frame (1 px trim rim, controller stone) around a niche 10 px deep, where the energy cube turns. Textures are Storage Drawers' own, referenced, not copied. Front is north.",
+  "parent": "block/block",
   "textures": {
+    "particle": "storagedrawers:block/drawers_comp_side_2",
     "top": "storagedrawers:block/drawers_comp_side",
-    "front": "storagedrawers:block/drawers_comp_side",
     "side": "storagedrawers:block/drawers_comp_side_2",
-    "trim": "storagedrawers:block/drawers_comp_trim"
-  }
+    "trim": "storagedrawers:block/drawers_comp_trim",
+    "inner": "storagedrawers:block/drawers_comp_side"
+  },
+  "elements": [
+    {
+      "__comment": "Body behind the niche; its north face is the niche's back wall",
+      "from": [0, 0, 10], "to": [16, 16, 16],
+      "faces": {
+        "north": { "texture": "#inner" },
+        "south": { "texture": "#side", "cullface": "south" },
+        "east":  { "texture": "#side", "cullface": "east" },
+        "west":  { "texture": "#side", "cullface": "west" },
+        "up":    { "texture": "#top", "cullface": "up" },
+        "down":  { "texture": "#top", "cullface": "down" }
+      }
+    },
+    {
+      "__comment": "Top wall",
+      "from": [0, 15, 0], "to": [16, 16, 10],
+      "faces": {
+        "north": { "texture": "#trim", "cullface": "north" },
+        "east":  { "texture": "#side", "cullface": "east" },
+        "west":  { "texture": "#side", "cullface": "west" },
+        "up":    { "texture": "#top", "cullface": "up" },
+        "down":  { "texture": "#inner" }
+      }
+    },
+    {
+      "__comment": "Bottom wall",
+      "from": [0, 0, 0], "to": [16, 1, 10],
+      "faces": {
+        "north": { "texture": "#trim", "cullface": "north" },
+        "east":  { "texture": "#side", "cullface": "east" },
+        "west":  { "texture": "#side", "cullface": "west" },
+        "up":    { "texture": "#inner" },
+        "down":  { "texture": "#top", "cullface": "down" }
+      }
+    },
+    {
+      "__comment": "East wall (left seen from the front)",
+      "from": [15, 1, 0], "to": [16, 15, 10],
+      "faces": {
+        "north": { "texture": "#trim", "cullface": "north" },
+        "east":  { "texture": "#side", "cullface": "east" },
+        "west":  { "texture": "#inner" }
+      }
+    },
+    {
+      "__comment": "West wall (right seen from the front)",
+      "from": [0, 1, 0], "to": [1, 15, 10],
+      "faces": {
+        "north": { "texture": "#trim", "cullface": "north" },
+        "west":  { "texture": "#side", "cullface": "west" },
+        "east":  { "texture": "#inner" }
+      }
+    }
+  ]
 }
