@@ -4,12 +4,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
-import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlock;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlockEntity;
-import dev.drimoz.immaterialstorage.util.EnergyFormat;
+import dev.drimoz.immaterialstorage.util.AmountFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
@@ -52,10 +50,6 @@ public class EnergyDrawerRenderer implements BlockEntityRenderer<EnergyDrawerBlo
     /** The cube sits a little high, leaving room for the amount under it. */
     private static final float CUBE_Y = 1f / 16f;
 
-    /** Text on the front plane, over the lower part of the niche. */
-    private static final float TEXT_Y = -5.5f / 16f;
-    private static final float TEXT_SCALE = 0.006f;
-
     private static final float FRAME_SPEED = 1.2f;
     private static final float CORE_SPEED_EMPTY = 2f;
     private static final float CORE_SPEED_FULL = 12f;
@@ -83,21 +77,18 @@ public class EnergyDrawerRenderer implements BlockEntityRenderer<EnergyDrawerBlo
         if (drawer.getLevel() == null) {
             return;
         }
-        Direction facing = drawer.getBlockState().getValue(EnergyDrawerBlock.FACING);
-        // The block is opaque, so its own light is 0: light the niche as the block in front is lit.
-        int light = LevelRenderer.getLightColor(drawer.getLevel(), drawer.getBlockPos().relative(facing));
+        int light = DrawerRendering.frontLight(drawer);
 
         long capacity = drawer.energy().getCapacityLong();
         long stored = drawer.energy().getStoredLong();
         float progress = capacity <= 0 ? 0f : (float) Math.min(1d, stored / (double) capacity);
 
         pose.pushPose();
-        // Block centre, then turned so that local north (-z) is the drawer's front.
-        pose.translate(0.5, 0.5, 0.5);
-        pose.mulPose(Axis.YP.rotationDegrees(180f - facing.toYRot()));
-
+        DrawerRendering.faceFront(pose, drawer);
         renderCube(drawer, partialTicks, pose, buffers, light, combinedOverlay, progress);
-        renderAmount(pose, buffers, light, stored, capacity);
+        // stored / capacity: the capacity moves with the upgrades, so stored alone says little.
+        DrawerRendering.drawAmount(font, pose, buffers, light,
+                AmountFormat.format(stored) + " / " + AmountFormat.format(capacity) + " FE");
 
         pose.popPose();
     }
@@ -127,19 +118,6 @@ public class EnergyDrawerRenderer implements BlockEntityRenderer<EnergyDrawerBlo
             pose.popPose();
         }
 
-        pose.popPose();
-    }
-
-    /** "stored / capacity": the capacity moves with the upgrades, so stored alone says little. */
-    private void renderAmount(PoseStack pose, MultiBufferSource buffers, int light, long stored, long capacity) {
-        String text = EnergyFormat.format(stored) + " / " + EnergyFormat.format(capacity) + " FE";
-        pose.pushPose();
-        // Just in front of the front plane, then turned to face whoever looks at the front.
-        pose.translate(0, TEXT_Y, -0.5f - 0.002f);
-        pose.mulPose(Axis.YP.rotationDegrees(180f));
-        pose.scale(TEXT_SCALE, -TEXT_SCALE, TEXT_SCALE);
-        font.drawInBatch(text, -font.width(text) / 2f, 0, 0xFFFFFFFF, false, pose.last().pose(), buffers,
-                Font.DisplayMode.POLYGON_OFFSET, 0, light);
         pose.popPose();
     }
 

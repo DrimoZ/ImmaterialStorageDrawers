@@ -18,6 +18,8 @@ public final class ISClientSetup {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ImmaterialStorage.ENERGY_DRAWER_BLOCK_ENTITY.get(),
                 context -> new EnergyDrawerRenderer(context.getFont()));
+        event.registerBlockEntityRenderer(ImmaterialStorage.FLUID_DRAWER_BLOCK_ENTITY.get(),
+                context -> new FluidDrawerRenderer(context.getFont()));
     }
 
     /**

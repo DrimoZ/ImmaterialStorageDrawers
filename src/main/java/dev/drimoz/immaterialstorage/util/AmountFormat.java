@@ -5,7 +5,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 /**
- * Formats an FE amount short, for a drawer face: 1.5K, 834M, 7.2B. Locale-independent, so every
+ * Formats an amount (FE, mB) short, for a drawer face: 1.5K, 834M, 7.2B. Locale-independent, so every
  * player reads the same figure.
  *
  * <p>Taken from Immaterial Drawers, adapted from Functional Storage's {@code util/NumberUtils#getFormatedBigNumber}.
@@ -16,7 +16,7 @@ import java.util.Locale;
  * and the same rounding upward through trillions and quadrillions. The point is that the number on
  * an energy drawer is written exactly like the number on the item drawer beside it, only longer.
  */
-public final class EnergyFormat {
+public final class AmountFormat {
 
     private static final DecimalFormat WITH_UNITS = new DecimalFormat("####0.#", DecimalFormatSymbols.getInstance(Locale.ROOT));
 
@@ -26,7 +26,7 @@ public final class EnergyFormat {
     private static final long TRILLION = 1_000_000_000_000L;
     private static final long QUADRILLION = 1_000_000_000_000_000L;
 
-    private EnergyFormat() {
+    private AmountFormat() {
     }
 
     public static String format(long amount) {

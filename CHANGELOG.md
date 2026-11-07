@@ -6,6 +6,7 @@
 - Fluid Drawer: holds one fluid, 32,000 mB (32 buckets) base, sized by the same Storage Drawers
   upgrades (void and creative included). Buckets and fluid containers fill and empty it by hand;
   pipes reach it on every side. Crafted from smooth stone, buckets and any Storage Drawers drawer.
+  The fluid stands in the niche as high as the drawer is full, with the amount written below.
 - Storage Drawers controllers and Controller Slaves expose the Fluid Drawers they link as one
   multi-tank handler, filling drawers that already hold a fluid before empty ones.
 - Energy Drawer: stores 500,000 FE, exposed to cables on every side. Crafted from smooth stone,
