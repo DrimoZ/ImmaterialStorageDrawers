@@ -20,9 +20,9 @@
 - Energy Drawers take Storage Drawers' own upgrades, 7 slots: storage upgrades multiply the
   capacity exactly as they do for items (from Storage Drawers' config; seven netherite upgrades
   reach about 7.2 billion FE), plus void, creative storage and creative vending. Right-click to
-  install, or sneak + right-click with an empty hand to open the upgrade screen, Storage Drawers
-  own drawer screen showing what the drawer holds. An upgrade the contents depend on cannot be
-  taken out.
+  install, or sneak + right-click with an empty hand to open the upgrade screen (Storage Drawers'
+  own drawer screen, showing what the drawer holds). An upgrade the contents depend on cannot be
+  taken out. Fluid Drawers take the same upgrades.
 - Storage Drawers controllers expose the total energy of the Energy Drawers they link: cables and
   machines on a controller fill and drain the whole network. Totals are summed in 64-bit and
   clamped only for the standard 2.1B FE API. Controller Slaves expose the same total.
