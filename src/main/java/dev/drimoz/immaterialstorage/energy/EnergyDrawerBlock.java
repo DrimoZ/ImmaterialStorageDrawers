@@ -1,16 +1,23 @@
 package dev.drimoz.immaterialstorage.energy;
 
+import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.network.NetworkNodeBlock;
 import dev.drimoz.immaterialstorage.upgrade.DrawerUpgrades;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -18,6 +25,8 @@ import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -70,6 +79,32 @@ public class EnergyDrawerBlock extends NetworkNodeBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new EnergyDrawerBlockEntity(pos, state);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return level.isClientSide || type != ImmaterialStorage.ENERGY_DRAWER_BLOCK_ENTITY.get()
+                ? null
+                : (BlockEntityTicker<T>) (BlockEntityTicker<EnergyDrawerBlockEntity>) EnergyDrawerBlockEntity::serverTick;
+    }
+
+    /** What a dropped drawer still holds, so a filled one is told apart from an empty one. */
+    @Override
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (data == null) {
+            return;
+        }
+        CompoundTag saved = data.copyTag();
+        Component energy = EnergyDrawerBlockEntity.describeStored(saved);
+        if (energy != null) {
+            tooltip.add(energy.copy().withStyle(ChatFormatting.GRAY));
+        }
+        int upgrades = EnergyDrawerBlockEntity.upgradeCount(saved);
+        if (upgrades > 0) {
+            tooltip.add(Component.translatable("tooltip.immaterialstorage_sd.upgrades", upgrades).withStyle(ChatFormatting.GRAY));
+        }
     }
 
     @Override

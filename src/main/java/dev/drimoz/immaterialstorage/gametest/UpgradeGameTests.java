@@ -12,6 +12,7 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
@@ -29,6 +31,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Storage Drawers' own upgrade items, installed in an Energy Drawer.
@@ -158,6 +163,9 @@ public final class UpgradeGameTests {
 
         ItemStack dropped = breakAndPickUp(helper);
         helper.assertTrue(dropped.has(DataComponents.BLOCK_ENTITY_DATA), "the dropped drawer carries nothing");
+        List<Component> tooltip = new ArrayList<>();
+        ImmaterialStorage.ENERGY_DRAWER.get().appendHoverText(dropped, Item.TooltipContext.EMPTY, tooltip, TooltipFlag.NORMAL);
+        helper.assertValueEqual(tooltip.size(), 2, "tooltip lines (energy, upgrades) on the dropped drawer");
 
         // Placed back the way a player does it, on top of a solid block two blocks away (the
         // platform surface is at y = 1, so the drawer lands in the air at y = 2).

@@ -63,6 +63,21 @@ public final class EnergyGameTests {
     }
 
     @GameTest(template = PLATFORM)
+    public static void clientsAreSentTheStoredEnergy(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(1, 1, 1);
+        helper.setBlock(pos, ImmaterialStorage.ENERGY_DRAWER.get());
+        energyAt(helper, pos).receiveEnergy(4_242, false);
+
+        // What a client receives, loaded into a block entity that never saw the server one.
+        var registries = helper.getLevel().registryAccess();
+        CompoundTag update = drawerAt(helper, pos).getUpdateTag(registries);
+        EnergyDrawerBlockEntity client = new EnergyDrawerBlockEntity(drawerAt(helper, pos).getBlockPos(), drawerAt(helper, pos).getBlockState());
+        client.loadWithComponents(update, registries);
+        helper.assertValueEqual(client.energy().getStoredLong(), 4_242L, "FE a client would see");
+        helper.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
     public static void theControllerExposesTheSumOfItsDrawers(GameTestHelper helper) {
         placeController(helper);
         BlockPos[] drawers = {CONTROLLER.east(), CONTROLLER.east(2), CONTROLLER.east(3)};

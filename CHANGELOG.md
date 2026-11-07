@@ -8,7 +8,8 @@
   on Storage Drawers' own drawer shape and controller stone textures (the front is a placeholder
   until the energy display exists).
 - A broken Energy Drawer keeps its energy and upgrades in the dropped item and gets them back when
-  placed. An empty one drops a plain item that stacks.
+  placed. An empty one drops a plain item that stacks. Its tooltip shows the energy and the number
+  of upgrades it holds.
 - Energy Drawers take Storage Drawers' own upgrades, 7 slots: storage upgrades multiply the
   capacity exactly as they do for items (from Storage Drawers' config; seven netherite upgrades
   reach about 7.2 billion FE), plus void, creative storage and creative vending. Right-click to

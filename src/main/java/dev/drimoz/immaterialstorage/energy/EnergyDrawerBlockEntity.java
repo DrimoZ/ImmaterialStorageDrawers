@@ -8,7 +8,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -18,7 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * Storage Drawers applies to items: with its default config one netherite upgrade gives 2048 x,
  * seven give 14,336 x (about 7.2 billion FE, past the int API, hence the long storage).
  *
- * <p>Not yet: client sync and rendering.
+ * <p>Not yet: rendering on the client (the data is synced already).
  */
 public class EnergyDrawerBlockEntity extends NetworkNodeBlockEntity {
 
@@ -44,8 +48,17 @@ public class EnergyDrawerBlockEntity extends NetworkNodeBlockEntity {
         @Override
         public void onChange() {
             setChanged();
+            syncPending = true;
         }
     };
+
+    /**
+     * Ticks between two client syncs of the stored amount. A cable can change it every tick; one
+     * packet per drawer per tick for a number on a face is not worth it.
+     */
+    private static final int SYNC_INTERVAL = 10;
+
+    private boolean syncPending;
 
     public EnergyDrawerBlockEntity(BlockPos pos, BlockState state) {
         super(ImmaterialStorage.ENERGY_DRAWER_BLOCK_ENTITY.get(), pos, state);
@@ -72,6 +85,7 @@ public class EnergyDrawerBlockEntity extends NetworkNodeBlockEntity {
         }
         energy.setCapacity(capacityFor(upgrades));
         setChanged();
+        syncNow();
         return true;
     }
 
@@ -86,7 +100,52 @@ public class EnergyDrawerBlockEntity extends NetworkNodeBlockEntity {
         ItemStack removed = upgrades.removeLast();
         energy.setCapacity(capacityFor(upgrades));
         setChanged();
+        syncNow();
         return removed;
+    }
+
+    /** Server ticker: sends the stored amount to clients, at most every {@link #SYNC_INTERVAL} ticks. */
+    public static void serverTick(Level level, BlockPos pos, BlockState state, EnergyDrawerBlockEntity drawer) {
+        if (drawer.syncPending && level.getGameTime() % SYNC_INTERVAL == 0) {
+            drawer.syncNow();
+        }
+    }
+
+    private void syncNow() {
+        syncPending = false;
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+        }
+    }
+
+    /** What the client needs: the same data as a save, energy and upgrades. */
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return saveCustomOnly(registries);
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    /**
+     * One tooltip line for a dropped drawer's saved data, or null when it holds no energy. Lives
+     * here because the tag layout does.
+     */
+    public static Component describeStored(CompoundTag saved) {
+        CompoundTag energy = saved.getCompound(ENERGY_TAG);
+        long stored = energy.getLong("Energy");
+        if (stored <= 0) {
+            return null;
+        }
+        return Component.translatable("tooltip.immaterialstorage_sd.energy",
+                String.format("%,d", stored), String.format("%,d", energy.getLong("Capacity")));
+    }
+
+    /** How many upgrades a dropped drawer's saved data holds. */
+    public static int upgradeCount(CompoundTag saved) {
+        return saved.getList(UPGRADES_TAG, Tag.TAG_COMPOUND).size();
     }
 
     static long capacityFor(DrawerUpgrades upgrades) {
