@@ -2,5 +2,7 @@
   "block.immaterialstorage_sd.energy_drawer": "Energy Drawer",
   "message.immaterialstorage_sd.upgrade_would_spill": "Empty the drawer first: its contents would not fit without this upgrade",
   "tooltip.immaterialstorage_sd.energy": "%s / %s FE",
-  "tooltip.immaterialstorage_sd.upgrades": "%s upgrade(s) inside"
+  "tooltip.immaterialstorage_sd.upgrades": "%s upgrade(s) inside",
+  "block.immaterialstorage_sd.fluid_drawer": "Fluid Drawer",
+  "tooltip.immaterialstorage_sd.fluid": "%s: %s / %s mB"
 }

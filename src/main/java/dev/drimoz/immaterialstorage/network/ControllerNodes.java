@@ -39,6 +39,16 @@ public final class ControllerNodes {
         }
     }
 
+    /**
+     * The live nodes of the network a controller or Controller Slave answers for. A slave answers
+     * for the controller it is bound to; a controller is bound to nothing and answers for itself.
+     * Resolved on every call: a slave can be rebound at any time.
+     */
+    public static <T extends NetworkNodeBlockEntity> List<T> ofNetwork(IControlGroup group, Class<T> kind) {
+        IControlGroup bound = group.getBoundControlGroup();
+        return of(bound != null ? bound : group, kind);
+    }
+
     /** The controller's live nodes of the given kind, in the order they were linked. */
     public static <T extends NetworkNodeBlockEntity> List<T> of(IControlGroup controller, Class<T> kind) {
         Set<NetworkNodeBlockEntity> nodes = NODES.get(controller);

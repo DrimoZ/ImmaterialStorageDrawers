@@ -1,1 +1,1 @@
-{ "replace": false, "values": [ "immaterialstorage_sd:energy_drawer" ] }
+{ "replace": false, "values": [ "immaterialstorage_sd:energy_drawer", "immaterialstorage_sd:fluid_drawer" ] }

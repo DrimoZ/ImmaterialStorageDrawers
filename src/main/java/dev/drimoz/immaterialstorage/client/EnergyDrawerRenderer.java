@@ -43,7 +43,7 @@ public class EnergyDrawerRenderer implements BlockEntityRenderer<EnergyDrawerBlo
             ResourceLocation.fromNamespaceAndPath(ImmaterialStorage.MOD_ID, "block/energy_cube_core"));
 
     /**
-     * The niche is 14 px wide and 10 px deep (models/block/energy_drawer.json). The cube turns on
+     * The niche is 14 px wide and 10 px deep (models/block/drawer_niche.json). The cube turns on
      * its vertical axis, so its diagonal must fit the depth: 6.5 x sqrt(2) = 9.2 px.
      */
     private static final float CUBE_SCALE = 6.5f / 16f;

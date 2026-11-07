@@ -5,6 +5,9 @@ import com.mojang.logging.LogUtils;
 import dev.drimoz.immaterialstorage.energy.ControllerEnergyStorage;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlock;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlockEntity;
+import dev.drimoz.immaterialstorage.fluid.ControllerFluidHandler;
+import dev.drimoz.immaterialstorage.fluid.FluidDrawerBlock;
+import dev.drimoz.immaterialstorage.fluid.FluidDrawerBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
@@ -27,7 +30,7 @@ import java.util.List;
 /**
  * Mod entry point and, for now, the whole registry.
  *
- * <p>Current state: one block, the Energy Drawer, with its item, listed in Storage Drawers' tab.
+ * <p>Two drawers, Energy and Fluid, with their items, listed in Storage Drawers' tab.
  */
 @Mod(ImmaterialStorage.MOD_ID)
 public final class ImmaterialStorage {
@@ -43,13 +46,21 @@ public final class ImmaterialStorage {
     public static final DeferredBlock<EnergyDrawerBlock> ENERGY_DRAWER = BLOCKS.register("energy_drawer",
             () -> new EnergyDrawerBlock(BlockBehaviour.Properties.of().strength(3.0f)));
 
+    public static final DeferredBlock<FluidDrawerBlock> FLUID_DRAWER = BLOCKS.register("fluid_drawer",
+            () -> new FluidDrawerBlock(BlockBehaviour.Properties.of().strength(3.0f)));
+
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MOD_ID);
 
     public static final DeferredItem<BlockItem> ENERGY_DRAWER_ITEM = ITEMS.registerSimpleBlockItem(ENERGY_DRAWER);
+    public static final DeferredItem<BlockItem> FLUID_DRAWER_ITEM = ITEMS.registerSimpleBlockItem(FLUID_DRAWER);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnergyDrawerBlockEntity>>
             ENERGY_DRAWER_BLOCK_ENTITY = BLOCK_ENTITIES.register("energy_drawer",
             () -> BlockEntityType.Builder.of(EnergyDrawerBlockEntity::new, ENERGY_DRAWER.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidDrawerBlockEntity>>
+            FLUID_DRAWER_BLOCK_ENTITY = BLOCK_ENTITIES.register("fluid_drawer",
+            () -> BlockEntityType.Builder.of(FluidDrawerBlockEntity::new, FLUID_DRAWER.get()).build(null));
 
     public ImmaterialStorage(IEventBus modBus) {
         BLOCKS.register(modBus);
@@ -62,6 +73,7 @@ public final class ImmaterialStorage {
     private static void addToCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(StorageDrawersContract.CREATIVE_TAB)) {
             event.accept(ENERGY_DRAWER_ITEM);
+            event.accept(FLUID_DRAWER_ITEM);
         }
     }
 
@@ -71,16 +83,22 @@ public final class ImmaterialStorage {
                 (be, context) -> be.node());
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ENERGY_DRAWER_BLOCK_ENTITY.get(),
                 (be, side) -> be.energy());
+        event.registerBlockEntity(StorageDrawersContract.DRAWER_GROUP, FLUID_DRAWER_BLOCK_ENTITY.get(),
+                (be, context) -> be.node());
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, FLUID_DRAWER_BLOCK_ENTITY.get(),
+                (be, side) -> be.tank());
 
         for (var name : List.of(StorageDrawersContract.CONTROLLER_BLOCK_ENTITY, StorageDrawersContract.CONTROLLER_IO_BLOCK_ENTITY)) {
             BlockEntityType<?> type = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(name);
             if (type == null) {
                 // Logged, not thrown: the drawers still work alone, only the network total is lost.
-                LOGGER.error("Storage Drawers has no block entity type {}: it will not expose energy", name);
+                LOGGER.error("Storage Drawers has no block entity type {}: it will not expose energy or fluids", name);
                 continue;
             }
             event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, (BlockEntityType<BlockEntity>) type,
                     (be, side) -> be instanceof IControlGroup group ? ControllerEnergyStorage.of(group) : null);
+            event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, (BlockEntityType<BlockEntity>) type,
+                    (be, side) -> be instanceof IControlGroup group ? ControllerFluidHandler.of(group) : null);
         }
     }
 }

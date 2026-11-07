@@ -1,8 +1,8 @@
 {
   "variants": {
-    "facing=north": { "model": "immaterialstorage_sd:block/energy_drawer" },
-    "facing=south": { "model": "immaterialstorage_sd:block/energy_drawer", "y": 180 },
-    "facing=west": { "model": "immaterialstorage_sd:block/energy_drawer", "y": 270 },
-    "facing=east": { "model": "immaterialstorage_sd:block/energy_drawer", "y": 90 }
+    "facing=north": { "model": "immaterialstorage_sd:block/drawer_niche" },
+    "facing=south": { "model": "immaterialstorage_sd:block/drawer_niche", "y": 180 },
+    "facing=west": { "model": "immaterialstorage_sd:block/drawer_niche", "y": 270 },
+    "facing=east": { "model": "immaterialstorage_sd:block/drawer_niche", "y": 90 }
   }
 }

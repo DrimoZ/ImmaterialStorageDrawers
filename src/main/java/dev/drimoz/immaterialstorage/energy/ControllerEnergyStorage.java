@@ -38,13 +38,8 @@ public final class ControllerEnergyStorage implements IEnergyStorage {
         return BY_CONTROLLER.computeIfAbsent(controller, ControllerEnergyStorage::new);
     }
 
-    /**
-     * A Controller Slave answers for the controller it is bound to; a controller is bound to nothing
-     * and answers for itself. Resolved on every call: a slave can be rebound at any time.
-     */
     private List<EnergyDrawerBlockEntity> drawers() {
-        IControlGroup bound = controller.getBoundControlGroup();
-        return ControllerNodes.of(bound != null ? bound : controller, EnergyDrawerBlockEntity.class);
+        return ControllerNodes.ofNetwork(controller, EnergyDrawerBlockEntity.class);
     }
 
     /** Fills drawers in the order they were linked: nearest first, as the controller searches. */

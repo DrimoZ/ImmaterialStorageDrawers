@@ -1,5 +1,5 @@
 {
-  "__comment": "Storage Drawers' frame (1 px trim rim, controller stone) around a niche 10 px deep, where the energy cube turns. Textures are Storage Drawers' own, referenced, not copied. Front is north.",
+  "__comment": "Shared by every drawer of ours: Storage Drawers' frame (1 px trim rim, controller stone) around a niche 10 px deep, where the renderer shows what the drawer holds. Textures are Storage Drawers' own, referenced, not copied. Front is north.",
   "parent": "block/block",
   "textures": {
     "particle": "storagedrawers:block/drawers_comp_side_2",
