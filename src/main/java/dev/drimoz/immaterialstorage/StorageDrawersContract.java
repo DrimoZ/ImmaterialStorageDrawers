@@ -1,7 +1,13 @@
 package dev.drimoz.immaterialstorage;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
+import com.jaquadro.minecraft.storagedrawers.config.ModCommonConfig;
+import com.jaquadro.minecraft.storagedrawers.item.EnumUpgradeCreative;
+import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeCreative;
+import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeStorage;
+import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeVoid;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 
 /**
@@ -46,6 +52,41 @@ public final class StorageDrawersContract {
      * storagedrawers:block/drawers_comp_side, drawers_comp_side_2, drawers_comp_trim, and the
      * parent model storagedrawers:block/drawer_orientable.
      */
+
+    // --- Upgrades: Storage Drawers' own items, read through their internal classes. A deliberate
+    // choice over adding items of ours; every such reference is below. ---
+
+    /**
+     * What a Storage Drawers storage upgrade adds to a drawer's multiplier, from their config
+     * (defaults 2, 4, 8, 16, 64, 256, 2048 for obsidian to netherite); 0 for anything else, or an
+     * upgrade disabled in their config.
+     */
+    public static int storageMultiplier(ItemStack stack) {
+        return stack.getItem() instanceof ItemUpgradeStorage upgrade && upgrade.isEnabled()
+                ? ModCommonConfig.INSTANCE.UPGRADES.getLevelMult(upgrade.level.getLevel())
+                : 0;
+    }
+
+    /** The multiplier of a drawer with no storage upgrade (1 by default), as Storage Drawers does. */
+    public static int baseMultiplier() {
+        return ModCommonConfig.INSTANCE.UPGRADES.getLevelMult(0);
+    }
+
+    public static boolean isVoidUpgrade(ItemStack stack) {
+        return stack.getItem() instanceof ItemUpgradeVoid upgrade && upgrade.isEnabled();
+    }
+
+    /** "Near-infinite storage" in Storage Drawers' words. */
+    public static boolean isCreativeStorageUpgrade(ItemStack stack) {
+        return stack.getItem() instanceof ItemUpgradeCreative upgrade && upgrade.isEnabled()
+                && upgrade.type == EnumUpgradeCreative.STORAGE;
+    }
+
+    /** "Unlimited withdrawal" in Storage Drawers' words. */
+    public static boolean isCreativeVendingUpgrade(ItemStack stack) {
+        return stack.getItem() instanceof ItemUpgradeCreative upgrade && upgrade.isEnabled()
+                && upgrade.type == EnumUpgradeCreative.VENDING;
+    }
 
     private StorageDrawersContract() {
     }
