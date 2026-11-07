@@ -45,9 +45,10 @@ Aucun mixin, aucune réflexion dans le mod (la réflexion n'est que dans le test
 
 ## Ce que le spike ne prouve PAS encore
 
-- **L'agrégation FE/fluide sur le contrôleur** (tâche 2) : enregistrer `EnergyStorage.BLOCK` sur le
-  `BlockEntityType` du contrôleur SD et sommer les nœuds liés. Le nœud connaît son contrôleur ; le
-  sens inverse (contrôleur → nœuds) reste à concevoir.
+- ~~L’agrégation FE sur le contrôleur~~ : **faite après le spike** (tâche 2, 7 nov.). Le sens
+  contrôleur → nœuds est un index tenu par nos nœuds (`network/ControllerNodes`), rempli au
+  soft-bind, vidé au `setRemoved`, revalidé à chaque lecture ; `EnergyStorage.BLOCK` est enregistré
+  sur le type `storagedrawers:controller`. 5 game tests de plus (`EnergyGameTests`).
 - **Délai de liaison en jeu** : un nœud posé à côté d'un contrôleur existant n'est lié qu'à la
   prochaine reconstruction, **jusqu'à 100 ticks (5 s)**. Acceptable ? À voir en jeu ; sinon,
   programmer un tick sur le contrôleur à la pose du nœud.

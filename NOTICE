@@ -8,3 +8,8 @@ saying so.
 Storage Drawers
 Copyright (c) 2014 Justin Aquadro
 Licensed under the MIT License.
+
+Functional Storage (src/main/java/dev/drimoz/immaterialstorage/storage/BigEnergyStorage.java is
+adapted from its fluid/BigFluidHandler, by way of Immaterial Drawers)
+Copyright (c) 2021 Buuz135, Rid
+Licensed under the MIT License.

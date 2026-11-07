@@ -30,6 +30,23 @@ public final class StorageDrawersContract {
     public static final ResourceLocation CONTROLLER_BLOCK =
             ResourceLocation.fromNamespaceAndPath("storagedrawers", "controller");
 
+    /**
+     * Registry name of the controller's block entity type ({@code ModBlockEntities.CONTROLLER}).
+     * One type for every controller block, framed ones included. Its block entities implement
+     * {@code IControlGroup}.
+     */
+    public static final ResourceLocation CONTROLLER_BLOCK_ENTITY =
+            ResourceLocation.fromNamespaceAndPath("storagedrawers", "controller");
+
+    /*
+     * Texture names our models will borrow from Storage Drawers' own assets, so non-item drawers
+     * share the controller's non-wood look without copying any file (Storage Drawers is a required
+     * dependency, its textures are always there). A rename on their side shows as a missing
+     * texture, not a crash. Used from model JSONs, listed here so the coupling has one home:
+     * storagedrawers:block/drawers_comp_side, drawers_comp_side_2, drawers_comp_trim, and the
+     * parent model storagedrawers:block/drawer_orientable.
+     */
+
     private StorageDrawersContract() {
     }
 }

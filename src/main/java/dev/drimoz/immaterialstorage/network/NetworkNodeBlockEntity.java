@@ -5,7 +5,7 @@ import com.jaquadro.minecraft.storagedrawers.api.storage.IControlGroup;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawer;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
 import com.jaquadro.minecraft.storagedrawers.api.storage.INetworked;
-import dev.drimoz.immaterialstorage.ImmaterialStorage;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,14 +26,21 @@ import java.util.Set;
  * in {@code BlockEntityController.setRemoved}). So every read re-checks the binding with
  * {@code isSoftBindingValid}, which Storage Drawers' own drawers do too.
  *
- * <p>Not this class's job: storing anything, or aggregating anything on the controller.
+ * <p>Not this class's job: storing anything. Subclasses store; {@link ControllerNodes} indexes.
  */
-public class NetworkNodeBlockEntity extends BlockEntity {
+public abstract class NetworkNodeBlockEntity extends BlockEntity {
 
     private final Node node = new Node();
 
-    public NetworkNodeBlockEntity(BlockPos pos, BlockState state) {
-        super(ImmaterialStorage.NETWORK_NODE_BLOCK_ENTITY.get(), pos, state);
+    protected NetworkNodeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
+
+    /** Also called on chunk unload: an unloaded node must leave its controller's total at once. */
+    @Override
+    public void setRemoved() {
+        super.setRemoved();
+        ControllerNodes.remove(this);
     }
 
     /** What we answer to Storage Drawers' {@code DRAWER_GROUP}. Same instance every time. */
@@ -81,6 +88,7 @@ public class NetworkNodeBlockEntity extends BlockEntity {
         @Override
         public void softBindControlGroup(IControlGroup group) {
             softBound.add(group);
+            ControllerNodes.add(group, NetworkNodeBlockEntity.this);
         }
 
         @Override

@@ -45,7 +45,7 @@ public final class SpikeGameTests {
     @GameTest(template = PLATFORM)
     public static void ourCapabilityIsTheOneStorageDrawersQueries(GameTestHelper helper) {
         BlockPos node = CONTROLLER.east();
-        helper.setBlock(node, ImmaterialStorage.NETWORK_NODE.get());
+        helper.setBlock(node, ImmaterialStorage.ENERGY_DRAWER.get());
 
         // Asked through Storage Drawers' own capability object, answered by our registration.
         IDrawerGroup group = Capabilities.DRAWER_GROUP.getCapability(helper.getLevel(), helper.absolutePos(node));
@@ -58,7 +58,7 @@ public final class SpikeGameTests {
     public static void aNodeNextToAControllerIsLinked(GameTestHelper helper) {
         BlockEntityController controller = placeController(helper);
         BlockPos node = CONTROLLER.east();
-        helper.setBlock(node, ImmaterialStorage.NETWORK_NODE.get());
+        helper.setBlock(node, ImmaterialStorage.ENERGY_DRAWER.get());
 
         controller.updateCache();
 
@@ -70,9 +70,9 @@ public final class SpikeGameTests {
     @GameTest(template = PLATFORM)
     public static void aNodeOnlyReachableThroughAnotherNodeIsLinked(GameTestHelper helper) {
         BlockEntityController controller = placeController(helper);
-        helper.setBlock(CONTROLLER.east(), ImmaterialStorage.NETWORK_NODE.get());
+        helper.setBlock(CONTROLLER.east(), ImmaterialStorage.ENERGY_DRAWER.get());
         BlockPos far = CONTROLLER.east(2);
-        helper.setBlock(far, ImmaterialStorage.NETWORK_NODE.get());
+        helper.setBlock(far, ImmaterialStorage.ENERGY_DRAWER.get());
 
         controller.updateCache();
 
@@ -85,7 +85,7 @@ public final class SpikeGameTests {
     public static void breakingTheControllerUnlinksTheNode(GameTestHelper helper) {
         BlockEntityController controller = placeController(helper);
         BlockPos node = CONTROLLER.east();
-        helper.setBlock(node, ImmaterialStorage.NETWORK_NODE.get());
+        helper.setBlock(node, ImmaterialStorage.ENERGY_DRAWER.get());
         controller.updateCache();
         helper.assertTrue(nodeAt(helper, node).controller() == controller, "precondition: node linked");
 
@@ -106,7 +106,7 @@ public final class SpikeGameTests {
                 for (int z = 0; z < 11 && placed.size() < WALL_NODES; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
                     if (!pos.equals(CONTROLLER)) {
-                        helper.setBlock(pos, ImmaterialStorage.NETWORK_NODE.get());
+                        helper.setBlock(pos, ImmaterialStorage.ENERGY_DRAWER.get());
                         placed.add(pos);
                     }
                 }
