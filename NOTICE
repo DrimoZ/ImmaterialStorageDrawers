@@ -1,0 +1,10 @@
+Immaterial Storage
+Copyright (c) 2026 DrimoZ
+
+This product is an addon to Storage Drawers and uses its public API
+(com.jaquadro.minecraft.storagedrawers.api). Files derived from Storage Drawers code carry a header
+saying so.
+
+Storage Drawers
+Copyright (c) 2014 Justin Aquadro
+Licensed under the MIT License.

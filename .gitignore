@@ -1,0 +1,36 @@
+# Gradle
+.gradle/
+build/
+repo/
+
+# Dev runtime
+run/
+run-data/
+run-gametest/
+run-1.20.1/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.eclipse/
+.settings/
+.classpath
+.project
+bin/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Datagen output is committed on purpose (see build.gradle); only its cache is not.
+# 1.21.1 has a single datagen run, so a single output folder - the client/server split arrives
+# in 1.21.4.
+src/generated/resources/.cache/
+
+# Third-party sources cloned for reading only - Storage Drawers (and the sibling mod).
+# Not ours to vendor, and re-clonable in one command. Clone command: git clone --depth 1 -b 1.21 https://github.com/jaquadro/StorageDrawers.git .reference/StorageDrawers
+.reference/
+

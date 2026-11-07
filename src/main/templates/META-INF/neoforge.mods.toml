@@ -1,0 +1,35 @@
+modLoader = "javafml"
+loaderVersion = "${loader_version_range}"
+license = "${mod_license}"
+issueTrackerURL = "https://github.com/DrimoZ/ImmaterialStorage/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+authors = "${mod_authors}"
+description = '''${mod_description}'''
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "${neo_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+# The mod we extend. Floor = the release the contract was read from (SPIKE.md). No upper
+# bound yet: the contract is four API interfaces and one capability name, and the game tests are
+# what catch a break - revisit if a release does break it.
+[[dependencies.${mod_id}]]
+modId = "storagedrawers"
+type = "required"
+versionRange = "[13.11.4,)"
+ordering = "AFTER"
+side = "BOTH"
