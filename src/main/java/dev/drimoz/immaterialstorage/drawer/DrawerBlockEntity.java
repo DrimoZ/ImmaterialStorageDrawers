@@ -64,30 +64,49 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity {
         return isContentEmpty() && upgrades.installed().isEmpty();
     }
 
-    /** Installs one upgrade from the stack (the caller shrinks it). False if it does not fit. */
+    /** Installs one upgrade from the stack in the first slot that takes it (the caller shrinks it). */
     public boolean installUpgrade(ItemStack stack) {
-        if (!upgrades.add(stack)) {
+        int slot = upgrades.slotFor(stack);
+        if (slot < 0) {
             return false;
         }
-        applyUpgrades();
-        setChanged();
-        syncNow();
+        setUpgrade(slot, stack);
         return true;
     }
 
-    /**
-     * Takes out the last installed upgrade, or returns empty when there is none or when the content
-     * would no longer fit: removing an upgrade never destroys anything.
-     */
-    public ItemStack removeLastUpgrade() {
-        if (upgrades.last().isEmpty() || !contentFits(upgrades.withoutLast())) {
+    public boolean canPlaceUpgrade(int slot, ItemStack stack) {
+        return upgrades.canPlace(slot, stack);
+    }
+
+    /** Whether the upgrade in this slot can come out: there is one, and the content would still fit. */
+    public boolean canRemoveUpgrade(int slot) {
+        return !upgrades.get(slot).isEmpty() && contentFits(upgrades.without(slot));
+    }
+
+    /** Takes the upgrade out of the slot, or returns empty when {@link #canRemoveUpgrade} says no. */
+    public ItemStack removeUpgrade(int slot) {
+        if (!canRemoveUpgrade(slot)) {
             return ItemStack.EMPTY;
         }
-        ItemStack removed = upgrades.removeLast();
+        ItemStack removed = upgrades.get(slot);
+        setUpgrade(slot, ItemStack.EMPTY);
+        return removed;
+    }
+
+    /**
+     * Sets a slot, for the upgrade screen and for {@link #installUpgrade}. A change that would
+     * destroy content is ignored rather than applied: removing an upgrade never destroys anything,
+     * whatever path the request took.
+     */
+    public void setUpgrade(int slot, ItemStack stack) {
+        boolean removing = !upgrades.get(slot).isEmpty() && !ItemStack.isSameItemSameComponents(upgrades.get(slot), stack);
+        if (removing && !contentFits(upgrades.without(slot))) {
+            return;
+        }
+        upgrades.set(slot, stack);
         applyUpgrades();
         setChanged();
         syncNow();
-        return removed;
     }
 
     /** Server ticker: sends the content to clients, at most every {@link #SYNC_INTERVAL} ticks. */

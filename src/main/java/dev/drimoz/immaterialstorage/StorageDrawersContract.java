@@ -58,6 +58,13 @@ public final class StorageDrawersContract {
     public static final ResourceLocation CONTROLLER_IO_BLOCK_ENTITY =
             ResourceLocation.fromNamespaceAndPath("storagedrawers", "controller_io");
 
+    /**
+     * Storage Drawers' single-drawer screen texture, which our upgrade screen draws on so it is the
+     * screen players know. Its slot positions are copied in DrawerMenu and DrawerScreen.
+     */
+    public static final ResourceLocation DRAWER_SCREEN_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath("storagedrawers", "textures/gui/drawers_1.png");
+
     /** Storage Drawers' creative tab, where our blocks are listed after theirs. */
     public static final ResourceKey<CreativeModeTab> CREATIVE_TAB = ResourceKey.create(Registries.CREATIVE_MODE_TAB,
             ResourceLocation.fromNamespaceAndPath("storagedrawers", "storagedrawers"));

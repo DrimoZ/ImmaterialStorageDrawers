@@ -2,6 +2,7 @@ package dev.drimoz.immaterialstorage.gametest;
 
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.StorageDrawersContract;
+import dev.drimoz.immaterialstorage.drawer.DrawerMenu;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlockEntity;
 import dev.drimoz.immaterialstorage.upgrade.DrawerUpgrades;
 import net.minecraft.core.BlockPos;
@@ -83,11 +84,11 @@ public final class UpgradeGameTests {
         drawer.installUpgrade(sd("iron_storage_upgrade"));
         drawer.energy().receiveEnergy((int) (BASE + 1), false);
 
-        helper.assertTrue(drawer.removeLastUpgrade().isEmpty(), "the upgrade came out although the energy no longer fits");
+        helper.assertTrue(drawer.removeUpgrade(0).isEmpty(), "the upgrade came out although the energy no longer fits");
         helper.assertValueEqual(drawer.energy().getStoredLong(), BASE + 1, "FE after the refused removal");
 
         drawer.energy().extractEnergy(1, false);
-        helper.assertFalse(drawer.removeLastUpgrade().isEmpty(), "the upgrade stayed in although the energy fits at base size");
+        helper.assertFalse(drawer.removeUpgrade(0).isEmpty(), "the upgrade stayed in although the energy fits at base size");
         helper.assertValueEqual(drawer.energy().getCapacityLong(), BASE, "capacity after removal");
         helper.succeed();
     }
@@ -135,8 +136,10 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
+    // Opening is only checked as an accepted interaction: the test server fake connection cannot
+    // carry NeoForge open-screen payload. The menu itself is tested by theScreenEnforcesTheUpgradeRules.
     @GameTest(template = PLATFORM)
-    public static void aPlayerInstallsAndRemovesAnUpgradeByHand(GameTestHelper helper) {
+    public static void aPlayerInstallsAnUpgradeAndOpensTheScreen(GameTestHelper helper) {
         EnergyDrawerBlockEntity drawer = placeDrawer(helper);
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, sd("iron_storage_upgrade").copyWithCount(3));
@@ -147,9 +150,41 @@ public final class UpgradeGameTests {
 
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         player.setShiftKeyDown(true);
-        use(helper, player);
-        helper.assertValueEqual(drawer.energy().getCapacityLong(), BASE, "capacity after taking the upgrade out");
-        helper.assertTrue(player.getInventory().contains(sd("iron_storage_upgrade")), "the removed upgrade is not in the inventory");
+        BlockPos abs = helper.absolutePos(DRAWER);
+        var result = helper.getLevel().getBlockState(abs).useWithoutItem(helper.getLevel(), player,
+                new BlockHitResult(Vec3.atCenterOf(abs), Direction.NORTH, abs, false));
+        helper.assertTrue(result.consumesAction(), "sneak + right-click with an empty hand was not taken as opening the screen");
+        helper.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void theScreenEnforcesTheUpgradeRules(GameTestHelper helper) {
+        EnergyDrawerBlockEntity drawer = placeDrawer(helper);
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        DrawerMenu menu = new DrawerMenu(0, player.getInventory(), drawer);
+        ItemStack voidUpgrade = sd("void_upgrade");
+
+        helper.assertFalse(menu.getSlot(0).mayPlace(new ItemStack(Items.DIAMOND)), "a diamond fits an upgrade slot");
+        helper.assertTrue(menu.getSlot(0).mayPlace(voidUpgrade), "a void upgrade does not fit an empty slot");
+
+        // Shift-click from the inventory installs it, once.
+        int firstInventorySlot = DrawerUpgrades.SLOTS;
+        player.getInventory().setItem(9, voidUpgrade.copyWithCount(2));
+        menu.quickMoveStack(player, firstInventorySlot);
+        helper.assertTrue(drawer.upgrades().hasVoid(), "shift-click did not install the void upgrade");
+        helper.assertValueEqual(player.getInventory().getItem(9).getCount(), 1, "void upgrades left after shift-click");
+        helper.assertFalse(menu.getSlot(1).mayPlace(voidUpgrade), "a second void upgrade fits");
+
+        // A storage upgrade that the energy depends on cannot be picked up.
+        drawer.installUpgrade(sd("iron_storage_upgrade"));
+        drawer.energy().receiveEnergy((int) (BASE + 1), false);
+        helper.assertFalse(menu.getSlot(1).mayPickup(player), "the storage upgrade can be picked up although the energy would not fit");
+        helper.assertTrue(menu.getSlot(0).mayPickup(player), "the void upgrade cannot be picked up");
+
+        // Shift-click the void upgrade back out.
+        menu.quickMoveStack(player, 0);
+        helper.assertFalse(drawer.upgrades().hasVoid(), "shift-click did not take the void upgrade out");
+        helper.assertValueEqual(player.getInventory().countItem(voidUpgrade.getItem()), 2, "void upgrades back in the inventory");
         helper.succeed();
     }
 

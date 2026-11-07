@@ -6,6 +6,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 /** Client-side registrations. Both events are mod-bus events, which NeoForge routes on its own. */
 @EventBusSubscriber(modid = ImmaterialStorage.MOD_ID, value = Dist.CLIENT)
@@ -20,6 +21,11 @@ public final class ISClientSetup {
                 context -> new EnergyDrawerRenderer(context.getFont()));
         event.registerBlockEntityRenderer(ImmaterialStorage.FLUID_DRAWER_BLOCK_ENTITY.get(),
                 context -> new FluidDrawerRenderer(context.getFont()));
+    }
+
+    @SubscribeEvent
+    public static void registerScreens(RegisterMenuScreensEvent event) {
+        event.register(ImmaterialStorage.DRAWER_MENU.get(), DrawerScreen::new);
     }
 
     /**

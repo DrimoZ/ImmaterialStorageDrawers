@@ -11,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -42,7 +43,7 @@ import java.util.List;
  * the item tooltip, and the sync ticker. Subclasses add what their content needs.
  *
  * <p>Right-click with a Storage Drawers upgrade installs it. Sneak + right-click with an empty hand
- * takes the last one out: a stopgap until drawers have a screen with upgrade slots.
+ * opens the upgrade screen, as on a Storage Drawers drawer.
  *
  * <p>Broken, a drawer keeps its contents and upgrades in the dropped item (vanilla's block entity
  * data component, applied back on placement), so breaking one never destroys anything. An empty
@@ -131,19 +132,11 @@ public abstract class DrawerBlock extends NetworkNodeBlock {
         if (!player.isShiftKeyDown() || !(level.getBlockEntity(pos) instanceof DrawerBlockEntity drawer)) {
             return InteractionResult.PASS;
         }
-        if (level.isClientSide) {
-            return InteractionResult.SUCCESS;
+        if (!level.isClientSide) {
+            player.openMenu(new SimpleMenuProvider(
+                    (id, inventory, opener) -> new DrawerMenu(id, inventory, drawer), getName()), pos);
         }
-        if (drawer.upgrades().last().isEmpty()) {
-            return InteractionResult.PASS;
-        }
-        ItemStack removed = drawer.removeLastUpgrade();
-        if (removed.isEmpty()) {
-            player.displayClientMessage(Component.translatable("message.immaterialstorage_sd.upgrade_would_spill"), true);
-        } else {
-            player.getInventory().placeItemBackInInventory(removed);
-        }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
     @Override

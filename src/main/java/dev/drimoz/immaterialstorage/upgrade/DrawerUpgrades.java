@@ -18,7 +18,7 @@ import java.util.List;
  * accepted: storage, void, creative storage, creative vending.
  *
  * <p>Not this class's job: what a multiplier means in FE or mB (the owning block entity decides),
- * or whether removing an upgrade would spill contents (it asks, see {@link #withoutLast()}).
+ * or whether removing an upgrade would spill contents (it asks, see {@link #without(int)}).
  */
 public final class DrawerUpgrades {
 
@@ -33,8 +33,13 @@ public final class DrawerUpgrades {
                 || StorageDrawersContract.isCreativeVendingUpgrade(stack);
     }
 
-    public boolean canAdd(ItemStack stack) {
-        if (!isAccepted(stack) || freeSlot() < 0) {
+    public ItemStack get(int slot) {
+        return slots.get(slot);
+    }
+
+    /** Whether the stack may go into this slot: an accepted kind, an empty slot, and only storage upgrades twice. */
+    public boolean canPlace(int slot, ItemStack stack) {
+        if (!isAccepted(stack) || !slots.get(slot).isEmpty()) {
             return false;
         }
         if (StorageDrawersContract.storageMultiplier(stack) > 0) {
@@ -43,43 +48,27 @@ public final class DrawerUpgrades {
         return slots.stream().noneMatch(installed -> installed.is(stack.getItem()));
     }
 
-    /** Installs one item of the stack (the caller shrinks it). False if {@link #canAdd} says no. */
-    public boolean add(ItemStack stack) {
-        if (!canAdd(stack)) {
-            return false;
-        }
-        slots.set(freeSlot(), stack.copyWithCount(1));
-        return true;
-    }
-
-    /** The upgrade {@link #removeLast()} would take out, or empty. */
-    public ItemStack last() {
-        for (int i = SLOTS - 1; i >= 0; i--) {
-            if (!slots.get(i).isEmpty()) {
-                return slots.get(i);
+    /** The first slot the stack may go into, or -1. */
+    public int slotFor(ItemStack stack) {
+        for (int i = 0; i < SLOTS; i++) {
+            if (canPlace(i, stack)) {
+                return i;
             }
         }
-        return ItemStack.EMPTY;
+        return -1;
     }
 
-    public ItemStack removeLast() {
-        for (int i = SLOTS - 1; i >= 0; i--) {
-            if (!slots.get(i).isEmpty()) {
-                ItemStack removed = slots.get(i);
-                slots.set(i, ItemStack.EMPTY);
-                return removed;
-            }
-        }
-        return ItemStack.EMPTY;
+    /** Puts one item of the stack in the slot, or empties it. No rule checked: the owner checks. */
+    public void set(int slot, ItemStack stack) {
+        slots.set(slot, stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1));
     }
 
-    /** A copy without the last upgrade: lets the owner check a removal before doing it. */
-    public DrawerUpgrades withoutLast() {
+    /** A copy with this slot emptied: lets the owner check a removal before doing it. */
+    public DrawerUpgrades without(int slot) {
         DrawerUpgrades copy = new DrawerUpgrades();
         for (int i = 0; i < SLOTS; i++) {
-            copy.slots.set(i, slots.get(i));
+            copy.slots.set(i, i == slot ? ItemStack.EMPTY : slots.get(i));
         }
-        copy.removeLast();
         return copy;
     }
 
@@ -107,15 +96,6 @@ public final class DrawerUpgrades {
     /** Installed upgrades, for dropping them when the block breaks. */
     public List<ItemStack> installed() {
         return slots.stream().filter(stack -> !stack.isEmpty()).toList();
-    }
-
-    private int freeSlot() {
-        for (int i = 0; i < SLOTS; i++) {
-            if (slots.get(i).isEmpty()) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     public ListTag save(HolderLookup.Provider registries) {

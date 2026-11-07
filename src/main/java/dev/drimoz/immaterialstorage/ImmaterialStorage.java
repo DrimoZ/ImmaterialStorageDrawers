@@ -2,6 +2,7 @@ package dev.drimoz.immaterialstorage;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IControlGroup;
 import com.mojang.logging.LogUtils;
+import dev.drimoz.immaterialstorage.drawer.DrawerMenu;
 import dev.drimoz.immaterialstorage.energy.ControllerEnergyStorage;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlock;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlockEntity;
@@ -10,6 +11,7 @@ import dev.drimoz.immaterialstorage.fluid.FluidDrawerBlock;
 import dev.drimoz.immaterialstorage.fluid.FluidDrawerBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -18,6 +20,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -62,10 +65,17 @@ public final class ImmaterialStorage {
             FLUID_DRAWER_BLOCK_ENTITY = BLOCK_ENTITIES.register("fluid_drawer",
             () -> BlockEntityType.Builder.of(FluidDrawerBlockEntity::new, FLUID_DRAWER.get()).build(null));
 
+    private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, MOD_ID);
+
+    /** One upgrade screen for every drawer; the position of the drawer travels with it. */
+    public static final DeferredHolder<MenuType<?>, MenuType<DrawerMenu>> DRAWER_MENU =
+            MENUS.register("drawer", () -> IMenuTypeExtension.create(DrawerMenu::fromNetwork));
+
     public ImmaterialStorage(IEventBus modBus) {
         BLOCKS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
         ITEMS.register(modBus);
+        MENUS.register(modBus);
         modBus.addListener(ImmaterialStorage::registerCapabilities);
         modBus.addListener(ImmaterialStorage::addToCreativeTab);
     }
