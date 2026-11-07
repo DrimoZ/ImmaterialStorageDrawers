@@ -9,9 +9,11 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
- * A Storage Drawers controller's energy: the sum of the Energy Drawers it links.
+ * A Storage Drawers controller's energy: the sum of the Energy Drawers it links. Also what its
+ * Controller Slaves expose.
  *
- * <p>Registered on Storage Drawers' controller block entity type; NeoForge lets any mod do that.
+ * <p>Registered on Storage Drawers' controller and Controller Slave block entity types; NeoForge
+ * lets any mod do that.
  * The controller has never heard of energy; it only tells each drawer it is linked, and
  * {@link ControllerNodes} turns that into this list.
  *
@@ -36,8 +38,13 @@ public final class ControllerEnergyStorage implements IEnergyStorage {
         return BY_CONTROLLER.computeIfAbsent(controller, ControllerEnergyStorage::new);
     }
 
+    /**
+     * A Controller Slave answers for the controller it is bound to; a controller is bound to nothing
+     * and answers for itself. Resolved on every call: a slave can be rebound at any time.
+     */
     private List<EnergyDrawerBlockEntity> drawers() {
-        return ControllerNodes.of(controller, EnergyDrawerBlockEntity.class);
+        IControlGroup bound = controller.getBoundControlGroup();
+        return ControllerNodes.of(bound != null ? bound : controller, EnergyDrawerBlockEntity.class);
     }
 
     /** Fills drawers in the order they were linked: nearest first, as the controller searches. */

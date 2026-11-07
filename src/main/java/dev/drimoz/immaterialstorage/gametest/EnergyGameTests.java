@@ -105,6 +105,25 @@ public final class EnergyGameTests {
     }
 
     @GameTest(template = PLATFORM)
+    public static void aControllerSlaveExposesTheSameTotal(GameTestHelper helper) {
+        placeController(helper);
+        BlockPos slave = CONTROLLER.west();
+        BlockPos drawer = CONTROLLER.east();
+        helper.setBlock(slave, BuiltInRegistries.BLOCK.get(StorageDrawersContract.CONTROLLER_IO_BLOCK));
+        helper.setBlock(drawer, ImmaterialStorage.ENERGY_DRAWER.get());
+
+        helper.startSequence()
+                .thenIdle(SETTLE_TICKS)
+                .thenExecute(() -> {
+                    energyAt(helper, drawer).receiveEnergy(777, false);
+                    helper.assertValueEqual(energyAt(helper, slave).getEnergyStored(), 777, "FE the slave reports");
+                    helper.assertValueEqual(energyAt(helper, slave).extractEnergy(700, false), 700, "FE extracted through the slave");
+                    helper.assertValueEqual(energyAt(helper, drawer).getEnergyStored(), 77, "FE left in the drawer");
+                })
+                .thenSucceed();
+    }
+
+    @GameTest(template = PLATFORM)
     public static void aBrokenDrawerLeavesTheTotalAtOnce(GameTestHelper helper) {
         placeController(helper);
         BlockPos kept = CONTROLLER.east();

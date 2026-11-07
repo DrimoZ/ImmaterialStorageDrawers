@@ -47,6 +47,17 @@ public final class StorageDrawersContract {
     public static final ResourceLocation CONTROLLER_BLOCK_ENTITY =
             ResourceLocation.fromNamespaceAndPath("storagedrawers", "controller");
 
+    /** Registry name of the Controller Slave block ({@code ModBlocks.CONTROLLER_IO}). */
+    public static final ResourceLocation CONTROLLER_IO_BLOCK =
+            ResourceLocation.fromNamespaceAndPath("storagedrawers", "controller_io");
+
+    /**
+     * Registry name of the Controller Slave's block entity type, framed ones included. Its block
+     * entities are {@code IControlGroup}s whose {@code getBoundControlGroup()} is their controller.
+     */
+    public static final ResourceLocation CONTROLLER_IO_BLOCK_ENTITY =
+            ResourceLocation.fromNamespaceAndPath("storagedrawers", "controller_io");
+
     /** Storage Drawers' creative tab, where our blocks are listed after theirs. */
     public static final ResourceKey<CreativeModeTab> CREATIVE_TAB = ResourceKey.create(Registries.CREATIVE_MODE_TAB,
             ResourceLocation.fromNamespaceAndPath("storagedrawers", "storagedrawers"));

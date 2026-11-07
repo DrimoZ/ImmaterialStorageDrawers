@@ -22,6 +22,8 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
 
+import java.util.List;
+
 /**
  * Mod entry point and, for now, the whole registry.
  *
@@ -70,14 +72,15 @@ public final class ImmaterialStorage {
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ENERGY_DRAWER_BLOCK_ENTITY.get(),
                 (be, side) -> be.energy());
 
-        BlockEntityType<?> controller = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(StorageDrawersContract.CONTROLLER_BLOCK_ENTITY);
-        if (controller == null) {
-            // Logged, not thrown: the drawers still work alone, only the controller total is lost.
-            LOGGER.error("Storage Drawers has no block entity type {}: controllers will not expose energy",
-                    StorageDrawersContract.CONTROLLER_BLOCK_ENTITY);
-            return;
+        for (var name : List.of(StorageDrawersContract.CONTROLLER_BLOCK_ENTITY, StorageDrawersContract.CONTROLLER_IO_BLOCK_ENTITY)) {
+            BlockEntityType<?> type = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(name);
+            if (type == null) {
+                // Logged, not thrown: the drawers still work alone, only the network total is lost.
+                LOGGER.error("Storage Drawers has no block entity type {}: it will not expose energy", name);
+                continue;
+            }
+            event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, (BlockEntityType<BlockEntity>) type,
+                    (be, side) -> be instanceof IControlGroup group ? ControllerEnergyStorage.of(group) : null);
         }
-        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, (BlockEntityType<BlockEntity>) controller,
-                (be, side) -> be instanceof IControlGroup group ? ControllerEnergyStorage.of(group) : null);
     }
 }
