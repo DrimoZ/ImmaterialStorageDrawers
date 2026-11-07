@@ -6,7 +6,10 @@ import com.jaquadro.minecraft.storagedrawers.item.EnumUpgradeCreative;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeCreative;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeStorage;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeVoid;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 
@@ -43,6 +46,10 @@ public final class StorageDrawersContract {
      */
     public static final ResourceLocation CONTROLLER_BLOCK_ENTITY =
             ResourceLocation.fromNamespaceAndPath("storagedrawers", "controller");
+
+    /** Storage Drawers' creative tab, where our blocks are listed after theirs. */
+    public static final ResourceKey<CreativeModeTab> CREATIVE_TAB = ResourceKey.create(Registries.CREATIVE_MODE_TAB,
+            ResourceLocation.fromNamespaceAndPath("storagedrawers", "storagedrawers"));
 
     /*
      * Texture names our models will borrow from Storage Drawers' own assets, so non-item drawers

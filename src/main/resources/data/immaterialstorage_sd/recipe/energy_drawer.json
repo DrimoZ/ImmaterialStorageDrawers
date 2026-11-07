@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "###",
+    "RXR",
+    "###"
+  ],
+  "key": {
+    "#": { "item": "minecraft:smooth_stone" },
+    "R": { "item": "minecraft:redstone_block" },
+    "X": { "tag": "storagedrawers:drawers" }
+  },
+  "result": { "id": "immaterialstorage_sd:energy_drawer" }
+}

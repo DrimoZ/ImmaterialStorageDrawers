@@ -7,6 +7,7 @@ import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlock;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -14,16 +15,17 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
 
 /**
  * Mod entry point and, for now, the whole registry.
  *
- * <p>Current state: the Energy Drawer exists as a block with no item, model or recipe; the game
- * tests place it directly.
+ * <p>Current state: one block, the Energy Drawer, with its item, listed in Storage Drawers' tab.
  */
 @Mod(ImmaterialStorage.MOD_ID)
 public final class ImmaterialStorage {
@@ -39,6 +41,10 @@ public final class ImmaterialStorage {
     public static final DeferredBlock<EnergyDrawerBlock> ENERGY_DRAWER = BLOCKS.register("energy_drawer",
             () -> new EnergyDrawerBlock(BlockBehaviour.Properties.of().strength(3.0f)));
 
+    private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MOD_ID);
+
+    public static final DeferredItem<BlockItem> ENERGY_DRAWER_ITEM = ITEMS.registerSimpleBlockItem(ENERGY_DRAWER);
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnergyDrawerBlockEntity>>
             ENERGY_DRAWER_BLOCK_ENTITY = BLOCK_ENTITIES.register("energy_drawer",
             () -> BlockEntityType.Builder.of(EnergyDrawerBlockEntity::new, ENERGY_DRAWER.get()).build(null));
@@ -46,7 +52,15 @@ public final class ImmaterialStorage {
     public ImmaterialStorage(IEventBus modBus) {
         BLOCKS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
+        ITEMS.register(modBus);
         modBus.addListener(ImmaterialStorage::registerCapabilities);
+        modBus.addListener(ImmaterialStorage::addToCreativeTab);
+    }
+
+    private static void addToCreativeTab(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey().equals(StorageDrawersContract.CREATIVE_TAB)) {
+            event.accept(ENERGY_DRAWER_ITEM);
+        }
     }
 
     @SuppressWarnings("unchecked")

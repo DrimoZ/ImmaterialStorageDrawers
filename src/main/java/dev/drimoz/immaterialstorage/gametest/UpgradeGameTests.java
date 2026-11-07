@@ -6,6 +6,7 @@ import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlockEntity;
 import dev.drimoz.immaterialstorage.upgrade.DrawerUpgrades;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
@@ -14,13 +15,16 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.gametest.GameTestHolder;
@@ -145,14 +149,54 @@ public final class UpgradeGameTests {
     }
 
     @GameTest(template = PLATFORM)
-    public static void breakingTheDrawerDropsItsUpgrades(GameTestHelper helper) {
+    public static void aBrokenDrawerKeepsItsEnergyAndUpgradesThroughReplacing(GameTestHelper helper) {
         EnergyDrawerBlockEntity drawer = placeDrawer(helper);
         drawer.installUpgrade(sd("gold_storage_upgrade"));
+        long capacity = drawer.energy().getCapacityLong();
+        int stored = (int) (BASE * 2);
+        drawer.energy().receiveEnergy(stored, false);
 
-        helper.setBlock(DRAWER, Blocks.AIR);
+        ItemStack dropped = breakAndPickUp(helper);
+        helper.assertTrue(dropped.has(DataComponents.BLOCK_ENTITY_DATA), "the dropped drawer carries nothing");
 
-        helper.assertItemEntityPresent(sd("gold_storage_upgrade").getItem(), DRAWER, 2.0);
+        // Placed back the way a player does it, on top of a solid block two blocks away (the
+        // platform surface is at y = 1, so the drawer lands in the air at y = 2).
+        BlockPos floor = DRAWER.east(2);
+        helper.setBlock(floor, Blocks.STONE);
+        helper.setBlock(floor.above(), Blocks.AIR);
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        player.setItemInHand(InteractionHand.MAIN_HAND, dropped);
+        BlockPos absFloor = helper.absolutePos(floor);
+        var placed = dropped.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND,
+                new BlockHitResult(Vec3.atCenterOf(absFloor).add(0, 0.5, 0), Direction.UP, absFloor, false)));
+
+        if (!(helper.getLevel().getBlockEntity(helper.absolutePos(floor.above())) instanceof EnergyDrawerBlockEntity replaced)) {
+            throw new GameTestAssertException("the drawer was not placed back: " + placed
+                    + ", floor=" + helper.getBlockState(floor) + ", above=" + helper.getBlockState(floor.above()));
+        }
+        helper.assertValueEqual(replaced.energy().getCapacityLong(), capacity, "capacity after replacing");
+        helper.assertValueEqual(replaced.energy().getStoredLong(), (long) stored, "FE after replacing");
+        helper.assertItemEntityNotPresent(sd("gold_storage_upgrade").getItem(), DRAWER, 3.0);
         helper.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void anEmptyDrawerDropsAPlainItem(GameTestHelper helper) {
+        placeDrawer(helper);
+        ItemStack dropped = breakAndPickUp(helper);
+        helper.assertFalse(dropped.has(DataComponents.BLOCK_ENTITY_DATA), "an empty drawer dropped with data: it would not stack");
+        helper.succeed();
+    }
+
+    /** Breaks the drawer with drops and returns the drawer item it dropped. */
+    private static ItemStack breakAndPickUp(GameTestHelper helper) {
+        helper.getLevel().destroyBlock(helper.absolutePos(DRAWER), true);
+        AABB around = new AABB(helper.absolutePos(DRAWER)).inflate(2);
+        return helper.getLevel().getEntitiesOfClass(ItemEntity.class, around).stream()
+                .map(ItemEntity::getItem)
+                .filter(stack -> stack.is(ImmaterialStorage.ENERGY_DRAWER_ITEM.get()))
+                .findFirst()
+                .orElseThrow(() -> new GameTestAssertException("breaking the drawer dropped no drawer"));
     }
 
     @GameTest(template = PLATFORM)

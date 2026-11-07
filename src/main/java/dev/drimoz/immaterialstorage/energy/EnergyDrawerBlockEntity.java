@@ -60,6 +60,11 @@ public class EnergyDrawerBlockEntity extends NetworkNodeBlockEntity {
         return upgrades;
     }
 
+    /** Nothing worth keeping in the dropped item: no energy (creative aside) and no upgrade. */
+    public boolean isEmpty() {
+        return energy.getStoredRaw() == 0 && upgrades.installed().isEmpty();
+    }
+
     /** Installs one upgrade from the stack (the caller shrinks it). False if it does not fit. */
     public boolean installUpgrade(ItemStack stack) {
         if (!upgrades.add(stack)) {
