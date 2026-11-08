@@ -1,0 +1,8 @@
+{
+  "block.immaterialstorage_sd.energy_drawer": "Tiroir à énergie",
+  "block.immaterialstorage_sd.fluid_drawer": "Tiroir à fluide",
+  "tooltip.immaterialstorage_sd.energy": "%s / %s FE",
+  "tooltip.immaterialstorage_sd.fluid": "%s : %s / %s mB",
+  "tooltip.immaterialstorage_sd.upgrades": "%s amélioration(s) installée(s)",
+  "tooltip.immaterialstorage_sd.empty": "Vide"
+}
