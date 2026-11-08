@@ -48,13 +48,6 @@ public abstract class NetworkNodeBlockEntity extends BlockEntity {
         return node;
     }
 
-    /** The controller that currently counts this block, or {@code null}. */
-    @Nullable
-    public IControlGroup controller() {
-        Set<IControlGroup> bound = node.getSoftBoundControlGroups();
-        return bound.isEmpty() ? null : bound.iterator().next();
-    }
-
     /**
      * A drawer group with no drawers. Non-null on purpose: the controller only keeps a soft binding
      * valid while its record holds this exact group ({@code record.storage == node}).

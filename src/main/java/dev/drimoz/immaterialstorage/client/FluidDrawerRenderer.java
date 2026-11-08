@@ -1,9 +1,9 @@
 package dev.drimoz.immaterialstorage.client;
 
+import dev.drimoz.immaterialstorage.StorageDrawersContract;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.drimoz.immaterialstorage.fluid.FluidDrawerBlockEntity;
-import dev.drimoz.immaterialstorage.util.AmountFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
@@ -55,7 +55,7 @@ public class FluidDrawerRenderer implements BlockEntityRenderer<FluidDrawerBlock
             renderFluid(pose, buffers, fluid, Math.min(1f, fluid.getAmount() / (float) capacity), light);
         }
         DrawerRendering.drawAmount(font, pose, buffers, light,
-                AmountFormat.format(fluid.getAmount()) + " / " + AmountFormat.format(capacity) + " mB");
+                StorageDrawersContract.formatCount(fluid.getAmount()) + " / " + StorageDrawersContract.formatCount(capacity) + " mB");
         pose.popPose();
     }
 

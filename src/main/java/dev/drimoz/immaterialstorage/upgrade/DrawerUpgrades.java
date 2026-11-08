@@ -13,9 +13,10 @@ import java.util.List;
 /**
  * The upgrade slots of one of our drawers, holding Storage Drawers' own upgrade items.
  *
- * <p>Same rules as their drawers: 7 slots, storage upgrades stack their multipliers additively,
- * every other kind fits once. Only the kinds that mean something for a non-item drawer are
- * accepted: storage, void, creative storage, creative vending.
+ * <p>Same rules as their drawers, applied by their own code (see
+ * {@code StorageDrawersContract.fitsAlongside}): 7 slots, storage upgrades stack their multipliers
+ * additively, any other kind fits once per group. Only the kinds that mean something for a non-item
+ * drawer are accepted: storage, void, creative storage, creative vending.
  *
  * <p>Not this class's job: what a multiplier means in FE or mB (the owning block entity decides),
  * or whether removing an upgrade would spill contents (it asks, see {@link #without(int)}).
@@ -37,15 +38,9 @@ public final class DrawerUpgrades {
         return slots.get(slot);
     }
 
-    /** Whether the stack may go into this slot: an accepted kind, an empty slot, and only storage upgrades twice. */
+    /** Whether the stack may go into this slot: an accepted kind, an empty slot, and Storage Drawers' group rule. */
     public boolean canPlace(int slot, ItemStack stack) {
-        if (!isAccepted(stack) || !slots.get(slot).isEmpty()) {
-            return false;
-        }
-        if (StorageDrawersContract.storageMultiplier(stack) > 0) {
-            return true;
-        }
-        return slots.stream().noneMatch(installed -> installed.is(stack.getItem()));
+        return isAccepted(stack) && slots.get(slot).isEmpty() && StorageDrawersContract.fitsAlongside(stack, slots);
     }
 
     /** The first slot the stack may go into, or -1. */

@@ -97,7 +97,13 @@ public class FluidDrawerBlockEntity extends DrawerBlockEntity {
         if (fluid.isEmpty()) {
             return null;
         }
-        return Component.translatable("tooltip.immaterialstorage_sd.fluid", fluid.getHoverName(),
-                String.format("%,d", fluid.getAmount()), String.format("%,d", saved.getInt(CAPACITY_TAG)));
+        return describe(fluid, saved.getInt(CAPACITY_TAG));
+    }
+
+    /** "Fluid: stored / capacity mB", exact: the item tooltip and the upgrade screen both say it this way. */
+    public static Component describe(FluidStack fluid, int capacity) {
+        Component name = fluid.isEmpty() ? Component.translatable("tooltip.immaterialstorage_sd.empty") : fluid.getHoverName();
+        return Component.translatable("tooltip.immaterialstorage_sd.fluid", name,
+                String.format("%,d", fluid.getAmount()), String.format("%,d", capacity));
     }
 }

@@ -6,7 +6,6 @@ import dev.drimoz.immaterialstorage.drawer.DrawerBlockEntity;
 import dev.drimoz.immaterialstorage.drawer.DrawerMenu;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlockEntity;
 import dev.drimoz.immaterialstorage.fluid.FluidDrawerBlockEntity;
-import dev.drimoz.immaterialstorage.util.AmountFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -67,7 +66,7 @@ public class DrawerScreen extends AbstractContainerScreen<DrawerMenu> {
             long capacity = energy.energy().getCapacityLong();
             float progress = capacity <= 0 ? 0 : (float) Math.min(1d, energy.energy().getStoredLong() / (double) capacity);
             fill(graphics, sprite(ENERGY_CORE), 0xFFFFFFFF, x, y, progress);
-            field(graphics, AmountFormat.format(energy.energy().getStoredLong()) + " FE");
+            field(graphics, StorageDrawersContract.formatCount(energy.energy().getStoredLong()) + " FE");
         } else if (drawer instanceof FluidDrawerBlockEntity fluidDrawer) {
             FluidStack fluid = fluidDrawer.tank().getFluid();
             if (!fluid.isEmpty()) {
@@ -75,7 +74,7 @@ public class DrawerScreen extends AbstractContainerScreen<DrawerMenu> {
                 float progress = Math.min(1f, fluid.getAmount() / (float) Math.max(1, fluidDrawer.tank().getCapacity()));
                 fill(graphics, sprite(client.getStillTexture(fluid)), client.getTintColor(fluid), x, y, progress);
             }
-            field(graphics, AmountFormat.format(fluid.getAmount()) + " mB");
+            field(graphics, StorageDrawersContract.formatCount(fluid.getAmount()) + " mB");
         }
     }
 
@@ -105,14 +104,10 @@ public class DrawerScreen extends AbstractContainerScreen<DrawerMenu> {
 
     private static Component exactAmount(DrawerBlockEntity drawer) {
         if (drawer instanceof EnergyDrawerBlockEntity energy) {
-            return Component.translatable("tooltip.immaterialstorage_sd.energy",
-                    String.format("%,d", energy.energy().getStoredLong()), String.format("%,d", energy.energy().getCapacityLong()));
+            return EnergyDrawerBlockEntity.describe(energy.energy().getStoredLong(), energy.energy().getCapacityLong());
         }
         if (drawer instanceof FluidDrawerBlockEntity fluidDrawer) {
-            FluidStack fluid = fluidDrawer.tank().getFluid();
-            return Component.translatable("tooltip.immaterialstorage_sd.fluid",
-                    fluid.isEmpty() ? Component.translatable("tooltip.immaterialstorage_sd.empty") : fluid.getHoverName(),
-                    String.format("%,d", fluid.getAmount()), String.format("%,d", fluidDrawer.tank().getCapacity()));
+            return FluidDrawerBlockEntity.describe(fluidDrawer.tank().getFluid(), fluidDrawer.tank().getCapacity());
         }
         return Component.empty();
     }

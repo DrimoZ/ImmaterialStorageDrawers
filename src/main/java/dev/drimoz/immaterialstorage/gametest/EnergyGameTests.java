@@ -1,5 +1,7 @@
 package dev.drimoz.immaterialstorage.gametest;
 
+import static dev.drimoz.immaterialstorage.gametest.TestSupport.*;
+
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.StorageDrawersContract;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
@@ -28,10 +30,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class EnergyGameTests {
 
-    private static final String PLATFORM = "drawer_wall";
-    private static final BlockPos CONTROLLER = new BlockPos(5, 1, 5);
-    /** The controller's own first rebuild runs one tick after it is placed. */
-    private static final int SETTLE_TICKS = 5;
     private static final long BASE = EnergyDrawerBlockEntity.BASE_CAPACITY;
 
     @GameTest(template = PLATFORM)
@@ -55,10 +53,10 @@ public final class EnergyGameTests {
         energyAt(helper, pos).receiveEnergy(12_345, false);
 
         var registries = helper.getLevel().registryAccess();
-        CompoundTag saved = drawerAt(helper, pos).saveWithoutMetadata(registries);
+        CompoundTag saved = energyDrawerAt(helper, pos).saveWithoutMetadata(registries);
         helper.setBlock(pos, Blocks.AIR);
         helper.setBlock(pos, ImmaterialStorage.ENERGY_DRAWER.get());
-        drawerAt(helper, pos).loadWithComponents(saved, registries);
+        energyDrawerAt(helper, pos).loadWithComponents(saved, registries);
 
         helper.assertValueEqual(energyAt(helper, pos).getEnergyStored(), 12_345, "FE after reload");
         helper.succeed();
@@ -72,8 +70,8 @@ public final class EnergyGameTests {
 
         // What a client receives, loaded into a block entity that never saw the server one.
         var registries = helper.getLevel().registryAccess();
-        CompoundTag update = drawerAt(helper, pos).getUpdateTag(registries);
-        EnergyDrawerBlockEntity client = new EnergyDrawerBlockEntity(drawerAt(helper, pos).getBlockPos(), drawerAt(helper, pos).getBlockState());
+        CompoundTag update = energyDrawerAt(helper, pos).getUpdateTag(registries);
+        EnergyDrawerBlockEntity client = new EnergyDrawerBlockEntity(energyDrawerAt(helper, pos).getBlockPos(), energyDrawerAt(helper, pos).getBlockState());
         client.loadWithComponents(update, registries);
         helper.assertValueEqual(client.energy().getStoredLong(), 4_242L, "FE a client would see");
         helper.succeed();
@@ -111,7 +109,7 @@ public final class EnergyGameTests {
         placeController(helper);
         BlockPos slave = CONTROLLER.west();
         BlockPos drawer = CONTROLLER.east();
-        helper.setBlock(slave, BuiltInRegistries.BLOCK.get(StorageDrawersContract.CONTROLLER_IO_BLOCK));
+        helper.setBlock(slave, BuiltInRegistries.BLOCK.get(CONTROLLER_IO_BLOCK));
         helper.setBlock(drawer, ImmaterialStorage.ENERGY_DRAWER.get());
 
         helper.startSequence()
@@ -141,7 +139,7 @@ public final class EnergyGameTests {
                     CompoundTag tag = new CompoundTag();
                     tag.putLong("Energy", 3_000_000_000L);
                     tag.putLong("Capacity", 4_000_000_000L);
-                    drawerAt(helper, CONTROLLER.east()).energy().deserializeNBT(helper.getLevel().registryAccess(), tag);
+                    energyDrawerAt(helper, CONTROLLER.east()).energy().deserializeNBT(helper.getLevel().registryAccess(), tag);
 
                     EnergyReading drawer = EnergyReading.of(helper.getBlockEntity(CONTROLLER.east()));
                     helper.assertTrue(drawer != null && drawer.stored() == 3_000_000_000L && drawer.capacity() == 4_000_000_000L,
@@ -192,7 +190,7 @@ public final class EnergyGameTests {
                         CompoundTag tag = new CompoundTag();
                         tag.putLong("Energy", each);
                         tag.putLong("Capacity", 3_000_000_000L);
-                        drawerAt(helper, pos).energy().deserializeNBT(helper.getLevel().registryAccess(), tag);
+                        energyDrawerAt(helper, pos).energy().deserializeNBT(helper.getLevel().registryAccess(), tag);
                     }
                     var controller = (ControllerEnergyStorage) energyAt(helper, CONTROLLER);
                     helper.assertValueEqual(controller.getStoredLong(), 2 * each, "FE summed in long");
@@ -201,22 +199,4 @@ public final class EnergyGameTests {
                 .thenSucceed();
     }
 
-    private static void placeController(GameTestHelper helper) {
-        helper.setBlock(CONTROLLER, BuiltInRegistries.BLOCK.get(StorageDrawersContract.CONTROLLER_BLOCK));
-    }
-
-    private static IEnergyStorage energyAt(GameTestHelper helper, BlockPos pos) {
-        IEnergyStorage energy = helper.getLevel().getCapability(Capabilities.EnergyStorage.BLOCK, helper.absolutePos(pos), null);
-        if (energy == null) {
-            throw new GameTestAssertException("no energy capability at " + pos);
-        }
-        return energy;
-    }
-
-    private static EnergyDrawerBlockEntity drawerAt(GameTestHelper helper, BlockPos pos) {
-        if (!(helper.getBlockEntity(pos) instanceof EnergyDrawerBlockEntity drawer)) {
-            throw new GameTestAssertException("no energy drawer at " + pos);
-        }
-        return drawer;
-    }
 }

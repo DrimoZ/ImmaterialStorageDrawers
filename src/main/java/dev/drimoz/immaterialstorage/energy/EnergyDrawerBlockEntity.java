@@ -95,7 +95,12 @@ public class EnergyDrawerBlockEntity extends DrawerBlockEntity {
         if (stored <= 0) {
             return null;
         }
+        return describe(stored, energy.getLong("Capacity"));
+    }
+
+    /** "stored / capacity FE", exact: the item tooltip and the upgrade screen both say it this way. */
+    public static Component describe(long stored, long capacity) {
         return Component.translatable("tooltip.immaterialstorage_sd.energy",
-                String.format("%,d", stored), String.format("%,d", energy.getLong("Capacity")));
+                String.format("%,d", stored), String.format("%,d", capacity));
     }
 }

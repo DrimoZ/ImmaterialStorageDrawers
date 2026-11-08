@@ -1,5 +1,7 @@
 package dev.drimoz.immaterialstorage.gametest;
 
+import static dev.drimoz.immaterialstorage.gametest.TestSupport.*;
+
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.StorageDrawersContract;
 import dev.drimoz.immaterialstorage.fluid.FluidDrawerBlockEntity;
@@ -38,10 +40,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class FluidGameTests {
 
-    private static final String PLATFORM = "drawer_wall";
-    private static final BlockPos CONTROLLER = new BlockPos(5, 1, 5);
-    private static final BlockPos DRAWER = new BlockPos(1, 1, 1);
-    private static final int SETTLE_TICKS = 5;
     private static final int BASE = FluidDrawerBlockEntity.BASE_CAPACITY;
 
     private static FluidStack water(int amount) {
@@ -71,11 +69,11 @@ public final class FluidGameTests {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
 
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WATER_BUCKET));
-        use(helper, player);
+        use(helper, player, DRAWER);
         helper.assertValueEqual(fluidsAt(helper, DRAWER).getFluidInTank(0).getAmount(), 1_000, "mB after emptying a bucket in");
         helper.assertTrue(player.getMainHandItem().is(Items.BUCKET), "the bucket did not come back empty");
 
-        use(helper, player);
+        use(helper, player, DRAWER);
         helper.assertValueEqual(fluidsAt(helper, DRAWER).getFluidInTank(0).getAmount(), 0, "mB after filling the bucket back");
         helper.assertTrue(player.getMainHandItem().is(Items.WATER_BUCKET), "the bucket did not come back full");
         helper.succeed();
@@ -84,7 +82,7 @@ public final class FluidGameTests {
     @GameTest(template = PLATFORM)
     public static void storageUpgradesMultiplyAndVoidSwallows(GameTestHelper helper) {
         helper.setBlock(DRAWER, ImmaterialStorage.FLUID_DRAWER.get());
-        FluidDrawerBlockEntity drawer = drawerAt(helper, DRAWER);
+        FluidDrawerBlockEntity drawer = fluidDrawerAt(helper, DRAWER);
         ItemStack iron = sd("iron_storage_upgrade");
         int ironMult = StorageDrawersContract.storageMultiplier(iron);
 
@@ -121,7 +119,7 @@ public final class FluidGameTests {
 
     @GameTest(template = PLATFORM)
     public static void theControllerFillsMatchingDrawersFirst(GameTestHelper helper) {
-        helper.setBlock(CONTROLLER, BuiltInRegistries.BLOCK.get(StorageDrawersContract.CONTROLLER_BLOCK));
+        placeController(helper);
         BlockPos empty = CONTROLLER.east();
         BlockPos watered = CONTROLLER.west();
         helper.setBlock(empty, ImmaterialStorage.FLUID_DRAWER.get());
@@ -146,29 +144,4 @@ public final class FluidGameTests {
                 .thenSucceed();
     }
 
-    private static void use(GameTestHelper helper, Player player) {
-        BlockPos abs = helper.absolutePos(DRAWER);
-        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(abs), Direction.NORTH, abs, false);
-        helper.getLevel().getBlockState(abs).useItemOn(player.getMainHandItem(), helper.getLevel(), player,
-                InteractionHand.MAIN_HAND, hit);
-    }
-
-    private static IFluidHandler fluidsAt(GameTestHelper helper, BlockPos pos) {
-        IFluidHandler fluids = helper.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, helper.absolutePos(pos), null);
-        if (fluids == null) {
-            throw new GameTestAssertException("no fluid capability at " + pos);
-        }
-        return fluids;
-    }
-
-    private static FluidDrawerBlockEntity drawerAt(GameTestHelper helper, BlockPos pos) {
-        if (!(helper.getBlockEntity(pos) instanceof FluidDrawerBlockEntity drawer)) {
-            throw new GameTestAssertException("no fluid drawer at " + pos);
-        }
-        return drawer;
-    }
-
-    private static ItemStack sd(String name) {
-        return new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("storagedrawers", name)));
-    }
 }

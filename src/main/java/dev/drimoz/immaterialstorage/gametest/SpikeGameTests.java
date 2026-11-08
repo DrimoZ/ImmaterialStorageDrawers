@@ -1,5 +1,7 @@
 package dev.drimoz.immaterialstorage.gametest;
 
+import static dev.drimoz.immaterialstorage.gametest.TestSupport.*;
+
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
 import com.jaquadro.minecraft.storagedrawers.capabilities.Capabilities;
@@ -35,12 +37,7 @@ import java.util.List;
 @PrefixGameTestTemplate(false)
 public final class SpikeGameTests {
 
-    /** Copied from the sibling mod: an 11 x 5 x 11 empty platform. */
-    private static final String PLATFORM = "drawer_wall";
-    private static final BlockPos CONTROLLER = new BlockPos(5, 1, 5);
     private static final int WALL_NODES = 50;
-    /** Enough for the controller's own first rebuild, scheduled one tick after it is placed. */
-    private static final int SETTLE_TICKS = 5;
 
     @GameTest(template = PLATFORM)
     public static void ourCapabilityIsTheOneStorageDrawersQueries(GameTestHelper helper) {
@@ -62,7 +59,7 @@ public final class SpikeGameTests {
 
         controller.updateCache();
 
-        helper.assertTrue(nodeAt(helper, node).controller() == controller, "the node was not soft-bound by the controller");
+        helper.assertTrue(controllerOf(nodeAt(helper, node)) == controller, "the node was not soft-bound by the controller");
         helper.assertValueEqual(controller.getDrawerCount(), 0, "item slots the controller counts for a node");
         helper.succeed();
     }
@@ -76,7 +73,7 @@ public final class SpikeGameTests {
 
         controller.updateCache();
 
-        helper.assertTrue(nodeAt(helper, far).controller() == controller,
+        helper.assertTrue(controllerOf(nodeAt(helper, far)) == controller,
                 "the controller's search did not walk through our node");
         helper.succeed();
     }
@@ -87,11 +84,11 @@ public final class SpikeGameTests {
         BlockPos node = CONTROLLER.east();
         helper.setBlock(node, ImmaterialStorage.ENERGY_DRAWER.get());
         controller.updateCache();
-        helper.assertTrue(nodeAt(helper, node).controller() == controller, "precondition: node linked");
+        helper.assertTrue(controllerOf(nodeAt(helper, node)) == controller, "precondition: node linked");
 
         helper.setBlock(CONTROLLER, Blocks.AIR);
 
-        helper.assertTrue(nodeAt(helper, node).controller() == null,
+        helper.assertTrue(controllerOf(nodeAt(helper, node)) == null,
                 "the node still answers a controller that no longer exists");
         helper.succeed();
     }
@@ -124,7 +121,7 @@ public final class SpikeGameTests {
                 .thenExecute(() -> {
                     rebuiltAt[0] = lastUpdateTime(controller);
                     for (BlockPos pos : placed) {
-                        helper.assertTrue(nodeAt(helper, pos).controller() == controller, "node not linked at " + pos);
+                        helper.assertTrue(controllerOf(nodeAt(helper, pos)) == controller, "node not linked at " + pos);
                     }
                     helper.assertValueEqual(controller.getDrawerCount(), 0,
                             "item slots counted for " + WALL_NODES + " nodes");
@@ -135,27 +132,11 @@ public final class SpikeGameTests {
                 .thenExecute(() -> {
                     helper.assertValueEqual(lastUpdateTime(controller), rebuiltAt[0], "controller rebuild time after idling");
                     for (BlockPos pos : placed) {
-                        helper.assertTrue(nodeAt(helper, pos).controller() == controller,
+                        helper.assertTrue(controllerOf(nodeAt(helper, pos)) == controller,
                                 "node unlinked after idling at " + pos);
                     }
                 })
                 .thenSucceed();
-    }
-
-    private static BlockEntityController placeController(GameTestHelper helper) {
-        helper.setBlock(CONTROLLER, BuiltInRegistries.BLOCK.get(StorageDrawersContract.CONTROLLER_BLOCK));
-        if (!(helper.getBlockEntity(CONTROLLER) instanceof BlockEntityController controller)) {
-            throw new GameTestAssertException("no Storage Drawers controller at " + CONTROLLER
-                    + " - is " + StorageDrawersContract.CONTROLLER_BLOCK + " still its name?");
-        }
-        return controller;
-    }
-
-    private static NetworkNodeBlockEntity nodeAt(GameTestHelper helper, BlockPos pos) {
-        if (!(helper.getBlockEntity(pos) instanceof NetworkNodeBlockEntity node)) {
-            throw new GameTestAssertException("no network node at " + pos);
-        }
-        return node;
     }
 
     /** Private in Storage Drawers; read by reflection, in tests only. */

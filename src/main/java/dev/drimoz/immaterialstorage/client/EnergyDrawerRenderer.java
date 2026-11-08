@@ -1,11 +1,11 @@
 package dev.drimoz.immaterialstorage.client;
 
+import dev.drimoz.immaterialstorage.StorageDrawersContract;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlockEntity;
-import dev.drimoz.immaterialstorage.util.AmountFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
@@ -88,7 +88,7 @@ public class EnergyDrawerRenderer implements BlockEntityRenderer<EnergyDrawerBlo
         renderCube(drawer, partialTicks, pose, buffers, light, combinedOverlay, progress);
         // stored / capacity: the capacity moves with the upgrades, so stored alone says little.
         DrawerRendering.drawAmount(font, pose, buffers, light,
-                AmountFormat.format(stored) + " / " + AmountFormat.format(capacity) + " FE");
+                StorageDrawersContract.formatCount(stored) + " / " + StorageDrawersContract.formatCount(capacity) + " FE");
 
         pose.popPose();
     }

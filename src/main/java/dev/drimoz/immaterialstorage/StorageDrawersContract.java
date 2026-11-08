@@ -5,9 +5,11 @@ import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityControllerIO;
 import com.jaquadro.minecraft.storagedrawers.config.ModCommonConfig;
 import com.jaquadro.minecraft.storagedrawers.item.EnumUpgradeCreative;
+import com.jaquadro.minecraft.storagedrawers.item.ItemUpgrade;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeCreative;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeStorage;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeVoid;
+import com.jaquadro.minecraft.storagedrawers.util.CountFormatter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -40,10 +42,6 @@ public final class StorageDrawersContract {
             ResourceLocation.fromNamespaceAndPath("storagedrawers", "drawer_group"),
             IDrawerGroup.class, Void.TYPE);
 
-    /** Registry name of the controller block ({@code ModBlocks.CONTROLLER}). */
-    public static final ResourceLocation CONTROLLER_BLOCK =
-            ResourceLocation.fromNamespaceAndPath("storagedrawers", "controller");
-
     /**
      * Registry name of the controller's block entity type ({@code ModBlockEntities.CONTROLLER}).
      * One type for every controller block, framed ones included. Its block entities implement
@@ -51,10 +49,6 @@ public final class StorageDrawersContract {
      */
     public static final ResourceLocation CONTROLLER_BLOCK_ENTITY =
             ResourceLocation.fromNamespaceAndPath("storagedrawers", "controller");
-
-    /** Registry name of the Controller Slave block ({@code ModBlocks.CONTROLLER_IO}). */
-    public static final ResourceLocation CONTROLLER_IO_BLOCK =
-            ResourceLocation.fromNamespaceAndPath("storagedrawers", "controller_io");
 
     /**
      * Registry name of the Controller Slave's block entity type, framed ones included. Its block
@@ -123,6 +117,47 @@ public final class StorageDrawersContract {
     public static boolean isCreativeVendingUpgrade(ItemStack stack) {
         return stack.getItem() instanceof ItemUpgradeCreative upgrade && upgrade.isEnabled()
                 && upgrade.type == EnumUpgradeCreative.VENDING;
+    }
+
+    /**
+     * Storage Drawers' own rule for whether an upgrade fits next to the ones installed: kinds that
+     * allow several (storage tiers) always fit, any other kind fits once per group. Creative storage
+     * and creative vending share a group, so a drawer holds one or the other, as in Storage Drawers.
+     */
+    public static boolean fitsAlongside(ItemStack candidate, Iterable<ItemStack> installed) {
+        if (!(candidate.getItem() instanceof ItemUpgrade upgrade) || !upgrade.isEnabled()) {
+            return false;
+        }
+        if (upgrade.getAllowMultiple()) {
+            return true;
+        }
+        for (ItemStack stack : installed) {
+            if (stack.getItem() instanceof ItemUpgrade other && other.getUpgradeGroup() == upgrade.getUpgradeGroup()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // --- Text ---
+
+    /**
+     * An amount written the way Storage Drawers writes counts on its own drawers (1234, 12.3K, 345M,
+     * 1.2G), with their formatter, so a wall of drawers reads alike. Theirs is int; past it, energy
+     * carries on in the same notation (G, T, P). Client side only: their class refers to the client
+     * font, which they do not use for this.
+     */
+    public static String formatCount(long amount) {
+        if (amount <= Integer.MAX_VALUE) {
+            return CountFormatter.formatApprox(null, (int) amount);
+        }
+        if (amount >= 1_000_000_000_000_000L) {
+            return String.format("%.1fP", amount / 1e15);
+        }
+        if (amount >= 1_000_000_000_000L) {
+            return String.format("%.1fT", amount / 1e12);
+        }
+        return String.format("%.1fG", amount / 1e9);
     }
 
     private StorageDrawersContract() {

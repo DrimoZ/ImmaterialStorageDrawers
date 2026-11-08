@@ -1,5 +1,7 @@
 package dev.drimoz.immaterialstorage.gametest;
 
+import static dev.drimoz.immaterialstorage.gametest.TestSupport.*;
+
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.StorageDrawersContract;
 import dev.drimoz.immaterialstorage.drawer.DrawerMenu;
@@ -46,8 +48,6 @@ import java.util.List;
 @PrefixGameTestTemplate(false)
 public final class UpgradeGameTests {
 
-    private static final String PLATFORM = "drawer_wall";
-    private static final BlockPos DRAWER = new BlockPos(1, 1, 1);
     private static final long BASE = EnergyDrawerBlockEntity.BASE_CAPACITY;
 
     @GameTest(template = PLATFORM)
@@ -112,7 +112,11 @@ public final class UpgradeGameTests {
         drawer.installUpgrade(sd("creative_storage_upgrade"));
         helper.assertValueEqual(drawer.energy().getCapacityLong(), Long.MAX_VALUE, "capacity with creative storage");
 
-        drawer.installUpgrade(sd("creative_vending_upgrade"));
+        // One creative upgrade per drawer, as in Storage Drawers: both are in the same group.
+        helper.assertFalse(drawer.installUpgrade(sd("creative_vending_upgrade")), "creative vending fits next to creative storage");
+
+        helper.assertFalse(drawer.removeUpgrade(0).isEmpty(), "creative storage cannot come out of an empty drawer");
+        helper.assertTrue(drawer.installUpgrade(sd("creative_vending_upgrade")), "creative vending refused on its own");
         helper.assertValueEqual(drawer.energy().extractEnergy(1_000, false), 1_000, "FE handed out by an empty vending drawer");
         helper.succeed();
     }
@@ -144,7 +148,7 @@ public final class UpgradeGameTests {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, sd("iron_storage_upgrade").copyWithCount(3));
 
-        use(helper, player);
+        use(helper, player, DRAWER);
         helper.assertValueEqual(player.getMainHandItem().getCount(), 2, "upgrades left in hand after installing one");
         helper.assertTrue(drawer.energy().getCapacityLong() > BASE, "capacity did not grow");
 
@@ -251,18 +255,6 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
-    /** What a right-click does: the item path first, the empty-hand path when it passes. */
-    private static void use(GameTestHelper helper, Player player) {
-        BlockPos abs = helper.absolutePos(DRAWER);
-        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(abs), Direction.NORTH, abs, false);
-        BlockState state = helper.getLevel().getBlockState(abs);
-        ItemInteractionResult result = state.useItemOn(player.getMainHandItem(), helper.getLevel(), player,
-                InteractionHand.MAIN_HAND, hit);
-        if (result == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION) {
-            state.useWithoutItem(helper.getLevel(), player, hit);
-        }
-    }
-
     private static EnergyDrawerBlockEntity placeDrawer(GameTestHelper helper) {
         helper.setBlock(DRAWER, ImmaterialStorage.ENERGY_DRAWER.get());
         if (!(helper.getBlockEntity(DRAWER) instanceof EnergyDrawerBlockEntity drawer)) {
@@ -271,11 +263,4 @@ public final class UpgradeGameTests {
         return drawer;
     }
 
-    private static ItemStack sd(String name) {
-        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("storagedrawers", name));
-        if (item == Items.AIR) {
-            throw new GameTestAssertException("Storage Drawers has no item " + name);
-        }
-        return new ItemStack(item);
-    }
 }
