@@ -1,50 +1,55 @@
 package dev.drimoz.immaterialstorage.client;
 
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.math.Axis;
 import dev.drimoz.immaterialstorage.StorageDrawersContract;
+import dev.drimoz.immaterialstorage.drawer.Compartments;
 import dev.drimoz.immaterialstorage.drawer.DrawerBlockEntity;
 import dev.drimoz.immaterialstorage.drawer.DrawerMenu;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlockEntity;
 import dev.drimoz.immaterialstorage.fluid.FluidDrawerBlockEntity;
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.math.Axis;
+import dev.drimoz.immaterialstorage.storage.DrawerFluidTank;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
- * A drawer's upgrade screen, drawn on Storage Drawers' own single-drawer screen texture so it is
- * the same screen a player already knows.
+ * A drawer's upgrade screen, drawn on Storage Drawers' own screen for that many drawers (1, 2 or 4)
+ * so it is the screen a player already knows.
  *
- * <p>It shows the content the way theirs shows an item: as an icon in the face's slot, the amount in
- * the field beside it, the exact figures on hover. A fluid is its still texture; energy is the
- * drawer's own energy cube, turning, its core glowing with the charge.
+ * <p>It reads like theirs: what each compartment holds sits in its slot as an item would (a fluid is
+ * its still texture; energy is the drawer's own energy cube, turning), the field beside them gives
+ * a compartment's capacity as theirs gives a drawer's, and hovering a slot gives its exact figures.
  */
 public class DrawerScreen extends AbstractContainerScreen<DrawerMenu> {
 
-    // Measured on Storage Drawers' drawers_1.png.
-    private static final int SLOT_X = 80;
-    private static final int SLOT_Y = 36;
+    // Measured on Storage Drawers' drawers_*.png; the slots are in Compartments.
     private static final int SLOT_SIZE = 16;
     private static final int FIELD_X = 128;
     private static final int FIELD_Y = 36;
     private static final int FIELD_WIDTH = 34;
     private static final int FIELD_HEIGHT = 16;
+    /** Storage Drawers' DrawerScreen writes this label here. */
+    private static final int UPGRADES_LABEL_Y = 75;
+    private static final int LABEL_COLOR = 0x404040;
 
     /** The cube fills the slot as an item would, tilted to show its top. */
     private static final float CUBE_PIXELS = 15f;
     private static final float CUBE_TILT = 25f;
 
+    private final Compartments compartments;
+
     public DrawerScreen(DrawerMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
+        this.compartments = menu.drawer() instanceof FluidDrawerBlockEntity fluids ? fluids.compartments() : Compartments.ONE;
         imageWidth = 176;
         imageHeight = 199;
         inventoryLabelY = imageHeight - 94;
@@ -54,33 +59,47 @@ public class DrawerScreen extends AbstractContainerScreen<DrawerMenu> {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         renderTooltip(graphics, mouseX, mouseY);
-        if (isHovering(SLOT_X, SLOT_Y, SLOT_SIZE, SLOT_SIZE, mouseX, mouseY)
-                || isHovering(FIELD_X, FIELD_Y, FIELD_WIDTH, FIELD_HEIGHT, mouseX, mouseY)) {
-            graphics.renderTooltip(font, exactAmount(menu.drawer()), mouseX, mouseY);
+        for (int i = 0; i < compartments.count(); i++) {
+            if (isHovering(compartments.screenSlotX(i), compartments.screenSlotY(i), SLOT_SIZE, SLOT_SIZE, mouseX, mouseY)) {
+                graphics.renderTooltip(font, exactAmount(menu.drawer(), i), mouseX, mouseY);
+            }
         }
     }
 
     @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+        super.renderLabels(graphics, mouseX, mouseY);
+        graphics.drawString(font, Component.translatable("container.storagedrawers.upgrades"), 8, UPGRADES_LABEL_Y, LABEL_COLOR, false);
+    }
+
+    @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.blit(StorageDrawersContract.DRAWER_SCREEN_TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+        graphics.blit(compartments.screenTexture(), leftPos, topPos, 0, 0, imageWidth, imageHeight);
         DrawerBlockEntity drawer = menu.drawer();
-        int x = leftPos + SLOT_X;
-        int y = topPos + SLOT_Y;
         if (drawer instanceof EnergyDrawerBlockEntity energy) {
             long capacity = energy.energy().getCapacityLong();
             float progress = capacity <= 0 ? 0 : (float) Math.min(1d, energy.energy().getStoredLong() / (double) capacity);
-            cube(graphics, x, y, progress, partialTick);
-            field(graphics, StorageDrawersContract.formatCount(energy.energy().getStoredLong()) + " FE");
-        } else if (drawer instanceof FluidDrawerBlockEntity fluidDrawer) {
-            FluidStack fluid = fluidDrawer.tank().getFluid();
-            if (!fluid.isEmpty()) {
-                IClientFluidTypeExtensions client = IClientFluidTypeExtensions.of(fluid.getFluid());
-                int color = client.getTintColor(fluid);
-                graphics.blit(x, y, 0, SLOT_SIZE, SLOT_SIZE, sprite(client.getStillTexture(fluid)),
-                        (color >> 16 & 0xFF) / 255f, (color >> 8 & 0xFF) / 255f, (color & 0xFF) / 255f, (color >>> 24) / 255f);
+            cube(graphics, leftPos + compartments.screenSlotX(0), topPos + compartments.screenSlotY(0), progress, partialTick);
+            field(graphics, StorageDrawersContract.formatCount(capacity) + " FE");
+        } else if (drawer instanceof FluidDrawerBlockEntity fluids) {
+            for (int i = 0; i < compartments.count(); i++) {
+                fluidIcon(graphics, fluids.tanks().get(i).getFluid(),
+                        leftPos + compartments.screenSlotX(i), topPos + compartments.screenSlotY(i));
             }
-            field(graphics, StorageDrawersContract.formatCount(fluid.getAmount()) + " mB");
+            field(graphics, StorageDrawersContract.formatCount(fluids.tanks().get(0).getCapacity()) + " mB");
         }
+    }
+
+    private static void fluidIcon(GuiGraphics graphics, FluidStack fluid, int x, int y) {
+        if (fluid.isEmpty()) {
+            return;
+        }
+        IClientFluidTypeExtensions client = IClientFluidTypeExtensions.of(fluid.getFluid());
+        int color = client.getTintColor(fluid);
+        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
+                .apply(client.getStillTexture(fluid));
+        graphics.blit(x, y, 0, SLOT_SIZE, SLOT_SIZE, sprite,
+                (color >> 16 & 0xFF) / 255f, (color >> 8 & 0xFF) / 255f, (color & 0xFF) / 255f, (color >>> 24) / 255f);
     }
 
     /** The energy cube in the slot, as an item icon: lit for items, turning like the one in the drawer. */
@@ -100,28 +119,25 @@ public class DrawerScreen extends AbstractContainerScreen<DrawerMenu> {
         pose.popPose();
     }
 
-    /** The short amount, centred in the field, shrunk when it would not fit. */
+    /** The capacity, centred in the field, shrunk when it would not fit. */
     private void field(GuiGraphics graphics, String text) {
         float scale = Math.min(1f, (FIELD_WIDTH - 2) / (float) font.width(text));
         var pose = graphics.pose();
         pose.pushPose();
         pose.translate(leftPos + FIELD_X + FIELD_WIDTH / 2f, topPos + FIELD_Y + (FIELD_HEIGHT - font.lineHeight * scale) / 2f + 1, 0);
         pose.scale(scale, scale, 1f);
-        graphics.drawString(font, text, -font.width(text) / 2, 0, 0x404040, false);
+        graphics.drawString(font, text, -font.width(text) / 2, 0, LABEL_COLOR, false);
         pose.popPose();
     }
 
-    private static Component exactAmount(DrawerBlockEntity drawer) {
+    private static Component exactAmount(DrawerBlockEntity drawer, int compartment) {
         if (drawer instanceof EnergyDrawerBlockEntity energy) {
             return EnergyDrawerBlockEntity.describe(energy.energy().getStoredLong(), energy.energy().getCapacityLong());
         }
-        if (drawer instanceof FluidDrawerBlockEntity fluidDrawer) {
-            return FluidDrawerBlockEntity.describe(fluidDrawer.tank().getFluid(), fluidDrawer.tank().getCapacity());
+        if (drawer instanceof FluidDrawerBlockEntity fluids) {
+            DrawerFluidTank tank = fluids.tanks().get(compartment);
+            return FluidDrawerBlockEntity.describe(tank.getFluid(), tank.getCapacity());
         }
         return Component.empty();
-    }
-
-    private static TextureAtlasSprite sprite(ResourceLocation texture) {
-        return Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
     }
 }

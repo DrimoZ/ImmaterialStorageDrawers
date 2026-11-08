@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "B#B",
+    "#X#",
+    "B#B"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:smooth_stone"
+    },
+    "B": {
+      "item": "minecraft:bucket"
+    },
+    "X": {
+      "tag": "storagedrawers:drawers"
+    }
+  },
+  "result": {
+    "id": "immaterialstorage_sd:fluid_drawer_4"
+  }
+}

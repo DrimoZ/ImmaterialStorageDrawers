@@ -110,10 +110,18 @@ final class TestSupport {
         return new ItemStack(item);
     }
 
-    /** What a right-click on the front does: the item path first, the empty-hand path when it passes. */
+    /** What a right-click on the middle of the front does: the item path first, the empty-hand path when it passes. */
     static void use(GameTestHelper helper, Player player, BlockPos pos) {
+        useAt(helper, player, pos, 0.5, 0.5);
+    }
+
+    /**
+     * A right-click on the front of a north-facing drawer, at a point measured from the block's
+     * corner: {@code x} along east (the viewer's left, seen from the north), {@code y} up.
+     */
+    static void useAt(GameTestHelper helper, Player player, BlockPos pos, double x, double y) {
         BlockPos abs = helper.absolutePos(pos);
-        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(abs), Direction.NORTH, abs, false);
+        BlockHitResult hit = new BlockHitResult(Vec3.atLowerCornerOf(abs).add(x, y, 0), Direction.NORTH, abs, false);
         BlockState state = helper.getLevel().getBlockState(abs);
         ItemInteractionResult result = state.useItemOn(player.getMainHandItem(), helper.getLevel(), player,
                 InteractionHand.MAIN_HAND, hit);

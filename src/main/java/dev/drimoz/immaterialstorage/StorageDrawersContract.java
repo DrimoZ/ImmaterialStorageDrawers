@@ -66,11 +66,12 @@ public final class StorageDrawersContract {
             ResourceLocation.fromNamespaceAndPath("storagedrawers", "controller_io");
 
     /**
-     * Storage Drawers' single-drawer screen texture, which our upgrade screen draws on so it is the
-     * screen players know. Its slot positions are copied in DrawerMenu and DrawerScreen.
+     * Storage Drawers' drawer screen for 1, 2 or 4 drawers, which our upgrade screen draws on so it is
+     * the screen players know. Its slot positions are copied in Compartments and DrawerMenu.
      */
-    public static final ResourceLocation DRAWER_SCREEN_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("storagedrawers", "textures/gui/drawers_1.png");
+    public static ResourceLocation drawerScreenTexture(int drawers) {
+        return ResourceLocation.fromNamespaceAndPath("storagedrawers", "textures/gui/drawers_" + drawers + ".png");
+    }
 
     /**
      * The controller and Controller Slave block entity classes, for probe mods that register by

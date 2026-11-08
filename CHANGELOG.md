@@ -3,6 +3,12 @@
 ## Unreleased
 
 ### Added
+- Fluid Drawers 1x2 and 2x2: two or four compartments, one fluid each, each holding half or a quarter
+  of a 1x1 (as Storage Drawers divides its drawers). A bucket fills or empties the compartment it is
+  used on; pipes and controllers fill compartments already holding that fluid first. Their upgrade
+  screen is Storage Drawers' own screen for 2 or 4 drawers, with each compartment's fluid in its slot.
+- The upgrade screen gives a compartment's capacity in its field, as Storage Drawers' screen does,
+  and the exact amount when a slot is hovered.
 - Framing: Storage Drawers' framing table frames Energy and Fluid Drawers like its own drawers
   (side, trim and front materials) and takes the frame off again. A framed drawer keeps its
   contents and upgrades through framing, breaking and placing. The inventory icon of a framed

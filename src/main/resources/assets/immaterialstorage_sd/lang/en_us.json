@@ -3,6 +3,8 @@
   "tooltip.immaterialstorage_sd.energy": "%s / %s FE",
   "tooltip.immaterialstorage_sd.upgrades": "%s upgrade(s) inside",
   "block.immaterialstorage_sd.fluid_drawer": "Fluid Drawer",
+  "block.immaterialstorage_sd.fluid_drawer_2": "Fluid Drawer 1x2",
+  "block.immaterialstorage_sd.fluid_drawer_4": "Fluid Drawer 2x2",
   "tooltip.immaterialstorage_sd.fluid": "%s: %s / %s mB",
   "tooltip.immaterialstorage_sd.empty": "Empty"
 }

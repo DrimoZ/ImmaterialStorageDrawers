@@ -1,6 +1,7 @@
 package dev.drimoz.immaterialstorage.fluid;
 
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
+import dev.drimoz.immaterialstorage.drawer.Compartments;
 import dev.drimoz.immaterialstorage.drawer.DrawerBlock;
 import dev.drimoz.immaterialstorage.drawer.DrawerBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -23,14 +24,21 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * The Fluid Drawer block. Right-click with a bucket or any fluid container fills or empties the
- * drawer, through NeoForge's own bucket logic; everything else a drawer does by hand is in
- * {@link DrawerBlock}.
+ * A Fluid Drawer block, with one, two or four compartments. Right-click with a bucket or any fluid
+ * container fills or empties the compartment it is used on, through NeoForge's own bucket logic;
+ * everything else a drawer does by hand is in {@link DrawerBlock}.
  */
 public class FluidDrawerBlock extends DrawerBlock {
 
-    public FluidDrawerBlock(Properties properties) {
+    private final Compartments compartments;
+
+    public FluidDrawerBlock(Properties properties, Compartments compartments) {
         super(properties);
+        this.compartments = compartments;
+    }
+
+    public Compartments compartments() {
+        return compartments;
     }
 
     @Override
@@ -46,8 +54,10 @@ public class FluidDrawerBlock extends DrawerBlock {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
-        if (stack.getCapability(Capabilities.FluidHandler.ITEM) != null) {
-            return FluidUtil.interactWithFluidHandler(player, hand, level, pos, null)
+        if (stack.getCapability(Capabilities.FluidHandler.ITEM) != null
+                && level.getBlockEntity(pos) instanceof FluidDrawerBlockEntity drawer) {
+            int compartment = compartments.at(pos, state.getValue(FACING), hit.getLocation());
+            return FluidUtil.interactWithFluidHandler(player, hand, drawer.tanks().get(compartment))
                     ? ItemInteractionResult.sidedSuccess(level.isClientSide)
                     : ItemInteractionResult.CONSUME;
         }
@@ -56,9 +66,6 @@ public class FluidDrawerBlock extends DrawerBlock {
 
     @Override
     protected void describeContent(CompoundTag saved, @Nullable HolderLookup.Provider registries, List<Component> tooltip) {
-        Component fluid = FluidDrawerBlockEntity.describeStored(saved, registries);
-        if (fluid != null) {
-            tooltip.add(fluid);
-        }
+        tooltip.addAll(FluidDrawerBlockEntity.describeStored(saved, registries));
     }
 }

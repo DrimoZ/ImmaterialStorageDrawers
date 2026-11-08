@@ -90,13 +90,13 @@ public final class FluidGameTests {
         int ironMult = StorageDrawersContract.storageMultiplier(iron);
 
         drawer.installUpgrade(iron);
-        helper.assertValueEqual(drawer.tank().getCapacity(), base() * ironMult, "capacity with one iron upgrade");
+        helper.assertValueEqual(drawer.tanks().get(0).getCapacity(), base() * ironMult, "capacity with one iron upgrade");
 
         drawer.installUpgrade(sd("void_upgrade"));
-        drawer.tank().fill(water(base() * ironMult), FluidAction.EXECUTE);
-        helper.assertValueEqual(drawer.tank().fill(water(1_000), FluidAction.EXECUTE), 1_000, "water reported accepted by a full void drawer");
-        helper.assertValueEqual(drawer.tank().fill(lava(1_000), FluidAction.EXECUTE), 0, "lava accepted by a void water drawer");
-        helper.assertValueEqual(drawer.tank().getFluidAmount(), base() * ironMult, "mB in a full void drawer");
+        drawer.tanks().get(0).fill(water(base() * ironMult), FluidAction.EXECUTE);
+        helper.assertValueEqual(drawer.tanks().get(0).fill(water(1_000), FluidAction.EXECUTE), 1_000, "water reported accepted by a full void drawer");
+        helper.assertValueEqual(drawer.tanks().get(0).fill(lava(1_000), FluidAction.EXECUTE), 0, "lava accepted by a void water drawer");
+        helper.assertValueEqual(drawer.tanks().get(0).getFluidAmount(), base() * ironMult, "mB in a full void drawer");
         helper.succeed();
     }
 
@@ -115,8 +115,8 @@ public final class FluidGameTests {
         FluidDrawerBlockEntity reloaded = new FluidDrawerBlockEntity(helper.absolutePos(DRAWER),
                 ImmaterialStorage.FLUID_DRAWER.get().defaultBlockState());
         reloaded.loadCustomOnly(saved, helper.getLevel().registryAccess());
-        helper.assertTrue(reloaded.tank().getFluid().is(Fluids.LAVA), "the dropped drawer lost its fluid");
-        helper.assertValueEqual(reloaded.tank().getFluidAmount(), 7_000, "mB in the dropped drawer");
+        helper.assertTrue(reloaded.tanks().get(0).getFluid().is(Fluids.LAVA), "the dropped drawer lost its fluid");
+        helper.assertValueEqual(reloaded.tanks().get(0).getFluidAmount(), 7_000, "mB in the dropped drawer");
         helper.succeed();
     }
 
@@ -147,4 +147,51 @@ public final class FluidGameTests {
                 .thenSucceed();
     }
 
+    @GameTest(template = PLATFORM)
+    public static void aTwoCompartmentDrawerHoldsTwoFluids(GameTestHelper helper) {
+        helper.setBlock(DRAWER, ImmaterialStorage.FLUID_DRAWER_2.get());
+        FluidDrawerBlockEntity drawer = fluidDrawerAt(helper, DRAWER);
+        IFluidHandler fluids = fluidsAt(helper, DRAWER);
+        helper.assertValueEqual(fluids.getTanks(), 2, "tanks of a two-compartment drawer");
+        helper.assertValueEqual(fluids.getTankCapacity(0), base() / 2, "mB per compartment of two");
+
+        fluids.fill(water(1_000), FluidAction.EXECUTE);
+        fluids.fill(lava(1_000), FluidAction.EXECUTE);
+        fluids.fill(water(500), FluidAction.EXECUTE);
+        helper.assertValueEqual(drawer.tanks().get(0).getFluidAmount(), 1_500, "water, all in the first compartment");
+        helper.assertTrue(drawer.tanks().get(1).getFluid().is(Fluids.LAVA), "lava did not take the empty compartment");
+        helper.assertValueEqual(fluids.fill(new FluidStack(Fluids.FLOWING_WATER, 100), FluidAction.EXECUTE), 0,
+                "a third fluid accepted by a full two-compartment drawer");
+        helper.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void aBucketFillsTheCompartmentItIsUsedOn(GameTestHelper helper) {
+        helper.setBlock(DRAWER, ImmaterialStorage.FLUID_DRAWER_4.get());
+        FluidDrawerBlockEntity drawer = fluidDrawerAt(helper, DRAWER);
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+
+        // Bottom right, seen from the front: the viewer's left is east, so west of the middle.
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WATER_BUCKET));
+        useAt(helper, player, DRAWER, 0.25, 0.25);
+        helper.assertValueEqual(drawer.tanks().get(3).getFluidAmount(), 1_000, "mB in the bottom right compartment");
+        // Top left.
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.LAVA_BUCKET));
+        useAt(helper, player, DRAWER, 0.75, 0.75);
+        helper.assertTrue(drawer.tanks().get(0).getFluid().is(Fluids.LAVA), "lava is not in the top left compartment");
+        helper.assertTrue(drawer.tanks().get(1).isEmpty() && drawer.tanks().get(2).isEmpty(), "a bucket reached another compartment");
+        helper.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void theControllerSeesEveryCompartment(GameTestHelper helper) {
+        placeController(helper);
+        helper.setBlock(CONTROLLER.east(), ImmaterialStorage.FLUID_DRAWER_4.get());
+        helper.setBlock(CONTROLLER.west(), ImmaterialStorage.FLUID_DRAWER.get());
+        helper.startSequence()
+                .thenIdle(SETTLE_TICKS)
+                .thenExecute(() -> helper.assertValueEqual(fluidsAt(helper, CONTROLLER).getTanks(), 5,
+                        "tanks of a controller linking a 2x2 and a 1x1 drawer"))
+                .thenSucceed();
+    }
 }

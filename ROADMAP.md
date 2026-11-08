@@ -16,6 +16,8 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
   a distinct inventory icon each.
 - **Drops keep everything**: a broken drawer keeps its contents and upgrades in the item.
 - **Jade and The One Probe** show the full energy, past the 2.1 billion FE of the standard API.
+- **Fluid Drawers 1x2 and 2x2**, each compartment its own tank, on Storage Drawers' 2- and 4-drawer
+  screens.
 - **Framing** at Storage Drawers' framing table, through its own frame data; the frame is drawn by
   a model of ours, not by Storage Drawers' internal model code.
 - **Seen in a world**: both drawers, framed or not, their fronts, the upgrade screen, the icons, and
@@ -25,9 +27,11 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
 
 ## Next
 
-1. **Framed inventory icons.** A framed drawer's item shows the plain icon; drawing the frame on it
+1. **Chemical Drawers** (Mekanism, optional) in 1x1, 1x2 and 2x2, then the **Source Drawer** (Ars
+   Nouveau, optional), with the controller exposing them as it does energy and fluids.
+2. **Framed inventory icons.** A framed drawer's item shows the plain icon; drawing the frame on it
    means wrapping the composite item models too.
-2. **Store page and README**, in the same style as Immaterial Drawers.
+3. **Store page and README**, in the same style as Immaterial Drawers.
 
 ## Considered, not planned
 
@@ -37,4 +41,3 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
 - **Faster linking.** A drawer placed next to an existing controller joins at the controller's next
   periodic rebuild, up to 5 seconds later. Storage Drawers' own drawers do exactly the same, so this
   stays as it is.
-- **Other contents** (Mekanism chemicals, Ars Nouveau Source): not planned for this mod.

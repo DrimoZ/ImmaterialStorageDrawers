@@ -1,0 +1,86 @@
+{
+  "__comment": "Inventory icon: the drawer with each of its 2 compartments half full of water (vanilla's still water, tinted by the item colour handler). The placed block draws its real contents with FluidDrawerRenderer instead.",
+  "parent": "block/block",
+  "loader": "neoforge:composite",
+  "children": {
+    "drawer": {
+      "parent": "immaterialstorage_sd:block/fluid_drawer_2"
+    },
+    "fluid": {
+      "render_type": "minecraft:translucent",
+      "textures": {
+        "fluid": "minecraft:block/water_still"
+      },
+      "elements": [
+        {
+          "from": [
+            2,
+            9,
+            1
+          ],
+          "to": [
+            14,
+            12,
+            14
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2,
+                4,
+                14,
+                7
+              ],
+              "texture": "#fluid",
+              "tintindex": 0
+            },
+            "up": {
+              "uv": [
+                2,
+                1,
+                14,
+                14
+              ],
+              "texture": "#fluid",
+              "tintindex": 0
+            }
+          }
+        },
+        {
+          "from": [
+            2,
+            2,
+            1
+          ],
+          "to": [
+            14,
+            4,
+            14
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2,
+                12,
+                14,
+                14
+              ],
+              "texture": "#fluid",
+              "tintindex": 0
+            },
+            "up": {
+              "uv": [
+                2,
+                1,
+                14,
+                14
+              ],
+              "texture": "#fluid",
+              "tintindex": 0
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -3,6 +3,7 @@ package dev.drimoz.immaterialstorage;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IControlGroup;
 import com.mojang.logging.LogUtils;
 import dev.drimoz.immaterialstorage.compat.top.TopCompat;
+import dev.drimoz.immaterialstorage.drawer.Compartments;
 import dev.drimoz.immaterialstorage.drawer.DrawerMenu;
 import dev.drimoz.immaterialstorage.energy.ControllerEnergyStorage;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlock;
@@ -53,13 +54,24 @@ public final class ImmaterialStorage {
     public static final DeferredBlock<EnergyDrawerBlock> ENERGY_DRAWER = BLOCKS.register("energy_drawer",
             () -> new EnergyDrawerBlock(BlockBehaviour.Properties.of().strength(3.0f)));
 
-    public static final DeferredBlock<FluidDrawerBlock> FLUID_DRAWER = BLOCKS.register("fluid_drawer",
-            () -> new FluidDrawerBlock(BlockBehaviour.Properties.of().strength(3.0f)));
+    public static final DeferredBlock<FluidDrawerBlock> FLUID_DRAWER = fluidDrawer(Compartments.ONE);
+    public static final DeferredBlock<FluidDrawerBlock> FLUID_DRAWER_2 = fluidDrawer(Compartments.TWO);
+    public static final DeferredBlock<FluidDrawerBlock> FLUID_DRAWER_4 = fluidDrawer(Compartments.FOUR);
+    /** The Fluid Drawers in their creative tab order: 1, 2, 4 compartments. */
+    public static final List<DeferredBlock<FluidDrawerBlock>> FLUID_DRAWERS = List.of(FLUID_DRAWER, FLUID_DRAWER_2, FLUID_DRAWER_4);
+
+    private static DeferredBlock<FluidDrawerBlock> fluidDrawer(Compartments compartments) {
+        return BLOCKS.register("fluid_drawer" + compartments.suffix(),
+                () -> new FluidDrawerBlock(BlockBehaviour.Properties.of().strength(3.0f), compartments));
+    }
 
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MOD_ID);
 
     public static final DeferredItem<BlockItem> ENERGY_DRAWER_ITEM = ITEMS.registerSimpleBlockItem(ENERGY_DRAWER);
     public static final DeferredItem<BlockItem> FLUID_DRAWER_ITEM = ITEMS.registerSimpleBlockItem(FLUID_DRAWER);
+    public static final DeferredItem<BlockItem> FLUID_DRAWER_2_ITEM = ITEMS.registerSimpleBlockItem(FLUID_DRAWER_2);
+    public static final DeferredItem<BlockItem> FLUID_DRAWER_4_ITEM = ITEMS.registerSimpleBlockItem(FLUID_DRAWER_4);
+    public static final List<DeferredItem<BlockItem>> FLUID_DRAWER_ITEMS = List.of(FLUID_DRAWER_ITEM, FLUID_DRAWER_2_ITEM, FLUID_DRAWER_4_ITEM);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnergyDrawerBlockEntity>>
             ENERGY_DRAWER_BLOCK_ENTITY = BLOCK_ENTITIES.register("energy_drawer",
@@ -67,7 +79,8 @@ public final class ImmaterialStorage {
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidDrawerBlockEntity>>
             FLUID_DRAWER_BLOCK_ENTITY = BLOCK_ENTITIES.register("fluid_drawer",
-            () -> BlockEntityType.Builder.of(FluidDrawerBlockEntity::new, FLUID_DRAWER.get()).build(null));
+            () -> BlockEntityType.Builder.of(FluidDrawerBlockEntity::new,
+                    FLUID_DRAWER.get(), FLUID_DRAWER_2.get(), FLUID_DRAWER_4.get()).build(null));
 
     private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, MOD_ID);
 
@@ -92,7 +105,7 @@ public final class ImmaterialStorage {
     private static void addToCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(StorageDrawersContract.CREATIVE_TAB)) {
             event.accept(ENERGY_DRAWER_ITEM);
-            event.accept(FLUID_DRAWER_ITEM);
+            FLUID_DRAWER_ITEMS.forEach(event::accept);
         }
     }
 
@@ -105,7 +118,7 @@ public final class ImmaterialStorage {
         event.registerBlockEntity(StorageDrawersContract.DRAWER_GROUP, FLUID_DRAWER_BLOCK_ENTITY.get(),
                 (be, context) -> be.node());
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, FLUID_DRAWER_BLOCK_ENTITY.get(),
-                (be, side) -> be.tank());
+                (be, side) -> be.fluids());
 
         for (var name : List.of(StorageDrawersContract.CONTROLLER_BLOCK_ENTITY, StorageDrawersContract.CONTROLLER_IO_BLOCK_ENTITY)) {
             BlockEntityType<?> type = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(name);

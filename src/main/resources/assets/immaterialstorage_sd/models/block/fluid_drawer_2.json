@@ -1,0 +1,7 @@
+{
+  "__comment": "The fluid drawer with 2 compartments: the shared drawer body for 2, with Functional Storage's fluid drawer front for 2 (MIT, see NOTICE).",
+  "parent": "immaterialstorage_sd:block/drawer_body_2",
+  "textures": {
+    "front": "immaterialstorage_sd:block/fluid_drawer_front_2"
+  }
+}

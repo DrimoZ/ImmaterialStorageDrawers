@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
+import dev.drimoz.immaterialstorage.drawer.Compartments;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -89,7 +90,8 @@ public class EnergyDrawerRenderer implements BlockEntityRenderer<EnergyDrawerBlo
         renderCube(drawer, partialTicks, pose, buffers, light, combinedOverlay, progress);
         // stored / capacity: the capacity moves with the upgrades, so stored alone says little.
         DrawerRendering.drawAmount(font, pose, buffers,
-                StorageDrawersContract.formatCount(stored) + " / " + StorageDrawersContract.formatCount(capacity) + " FE");
+                StorageDrawersContract.formatCount(stored) + " / " + StorageDrawersContract.formatCount(capacity) + " FE",
+                Compartments.ONE, 0);
 
         pose.popPose();
     }

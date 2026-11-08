@@ -26,7 +26,8 @@ public final class ISClientSetup {
 
     @SubscribeEvent
     public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
-        event.register((stack, tintIndex) -> tintIndex == 0 ? WATER_COLOR : -1, ImmaterialStorage.FLUID_DRAWER_ITEM.get());
+        ImmaterialStorage.FLUID_DRAWER_ITEMS.forEach(item ->
+                event.register((stack, tintIndex) -> tintIndex == 0 ? WATER_COLOR : -1, item.get()));
     }
 
     @SubscribeEvent
@@ -49,7 +50,9 @@ public final class ISClientSetup {
     /** Every state of our drawers wears its frame, when it has one. */
     @SubscribeEvent
     public static void wrapFramedModels(ModelEvent.ModifyBakingResult event) {
-        for (Block block : List.of(ImmaterialStorage.ENERGY_DRAWER.get(), ImmaterialStorage.FLUID_DRAWER.get())) {
+        List<Block> drawers = new java.util.ArrayList<>(List.of(ImmaterialStorage.ENERGY_DRAWER.get()));
+        ImmaterialStorage.FLUID_DRAWERS.forEach(drawer -> drawers.add(drawer.get()));
+        for (Block block : drawers) {
             for (BlockState state : block.getStateDefinition().getPossibleStates()) {
                 event.getModels().computeIfPresent(BlockModelShaper.stateToModelLocation(state),
                         (location, plain) -> new FramedDrawerModel(plain));
