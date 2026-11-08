@@ -1,5 +1,6 @@
 package dev.drimoz.immaterialstorage.fluid;
 
+import dev.drimoz.immaterialstorage.ISConfig;
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.drawer.DrawerBlockEntity;
 import dev.drimoz.immaterialstorage.storage.DrawerFluidTank;
@@ -15,18 +16,16 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A Fluid Drawer: a drawer that holds one fluid, sized by Storage Drawers' upgrades.
  *
- * <p>Capacity = {@link #BASE_CAPACITY} mB x the storage multiplier, like the Energy Drawer. The fluid
+ * <p>Capacity = the configured base ({@link ISConfig}, 32,000 mB by default, 32 buckets as a full
+ * Storage Drawers drawer holds 32 stacks) x the storage multiplier, like the Energy Drawer. The fluid
  * API is int, so it stops at 2.1 billion mB; the default curve tops out at 458,752,000 mB.
  */
 public class FluidDrawerBlockEntity extends DrawerBlockEntity {
 
-    /** mB held with no storage upgrade: 32 buckets, as a full Storage Drawers drawer holds 32 stacks. */
-    public static final int BASE_CAPACITY = 32_000;
-
     private static final String FLUID_TAG = "Fluid";
     private static final String CAPACITY_TAG = "Capacity";
 
-    private final DrawerFluidTank tank = new DrawerFluidTank(BASE_CAPACITY) {
+    private final DrawerFluidTank tank = new DrawerFluidTank(capacityFor(upgrades())) {
         @Override
         public boolean isDrawerVoid() {
             return upgrades().hasVoid();
@@ -56,12 +55,13 @@ public class FluidDrawerBlockEntity extends DrawerBlockEntity {
         if (upgrades.hasCreativeStorage()) {
             return Integer.MAX_VALUE;
         }
-        return (int) Math.min(Integer.MAX_VALUE, (long) BASE_CAPACITY * upgrades.storageMultiplier());
+        return (int) Math.min(Integer.MAX_VALUE, (long) ISConfig.fluidBaseCapacity() * upgrades.storageMultiplier());
     }
 
     @Override
     protected void applyUpgrades() {
-        tank.resize(capacityFor(upgrades()));
+        // Never below what it holds: a pack lowering the base size must not delete fluid on load.
+        tank.resize(Math.max(capacityFor(upgrades()), tank.getFluidAmount()));
     }
 
     @Override

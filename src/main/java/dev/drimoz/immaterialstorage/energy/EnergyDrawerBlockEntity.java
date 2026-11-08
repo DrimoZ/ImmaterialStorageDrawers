@@ -1,5 +1,6 @@
 package dev.drimoz.immaterialstorage.energy;
 
+import dev.drimoz.immaterialstorage.ISConfig;
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.drawer.DrawerBlockEntity;
 import dev.drimoz.immaterialstorage.storage.BigEnergyStorage;
@@ -14,18 +15,15 @@ import org.jetbrains.annotations.Nullable;
 /**
  * An Energy Drawer: a drawer that holds Forge Energy, sized by Storage Drawers' upgrades.
  *
- * <p>Capacity = {@link #BASE_CAPACITY} x the drawer's storage multiplier, the same arithmetic
+ * <p>Capacity = the configured base ({@link ISConfig}, 500,000 FE by default) x the drawer's storage multiplier, the same arithmetic
  * Storage Drawers applies to items: with its default config one netherite upgrade gives 2048 x,
  * seven give 14,336 x (about 7.2 billion FE, past the int API, hence the long storage).
  */
 public class EnergyDrawerBlockEntity extends DrawerBlockEntity {
 
-    /** FE held with no storage upgrade. Immaterial Drawers' base size. */
-    public static final long BASE_CAPACITY = 500_000;
-
     private static final String ENERGY_TAG = "Energy";
 
-    private final BigEnergyStorage energy = new BigEnergyStorage(BASE_CAPACITY) {
+    private final BigEnergyStorage energy = new BigEnergyStorage(capacityFor(upgrades())) {
         @Override
         public boolean isDrawerVoid() {
             return upgrades().hasVoid();
@@ -55,14 +53,16 @@ public class EnergyDrawerBlockEntity extends DrawerBlockEntity {
         if (upgrades.hasCreativeStorage()) {
             return Long.MAX_VALUE;
         }
+        long base = ISConfig.energyBaseCapacity();
         long multiplier = upgrades.storageMultiplier();
         // Saturating: a pack can raise the multipliers far enough to overflow a long.
-        return multiplier > Long.MAX_VALUE / BASE_CAPACITY ? Long.MAX_VALUE : BASE_CAPACITY * multiplier;
+        return multiplier > Long.MAX_VALUE / base ? Long.MAX_VALUE : base * multiplier;
     }
 
     @Override
     protected void applyUpgrades() {
-        energy.setCapacity(capacityFor(upgrades()));
+        // Never below what it holds: a pack lowering the base size must not delete energy on load.
+        energy.setCapacity(Math.max(capacityFor(upgrades()), energy.getStoredRaw()));
     }
 
     @Override

@@ -18,6 +18,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -73,7 +75,8 @@ public final class ImmaterialStorage {
     public static final DeferredHolder<MenuType<?>, MenuType<DrawerMenu>> DRAWER_MENU =
             MENUS.register("drawer", () -> IMenuTypeExtension.create(DrawerMenu::fromNetwork));
 
-    public ImmaterialStorage(IEventBus modBus) {
+    public ImmaterialStorage(IEventBus modBus, ModContainer container) {
+        container.registerConfig(ModConfig.Type.COMMON, ISConfig.SPEC);
         BLOCKS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
         ITEMS.register(modBus);

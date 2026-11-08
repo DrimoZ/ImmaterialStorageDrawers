@@ -2,6 +2,7 @@ package dev.drimoz.immaterialstorage.gametest;
 
 import static dev.drimoz.immaterialstorage.gametest.TestSupport.*;
 
+import dev.drimoz.immaterialstorage.ISConfig;
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.StorageDrawersContract;
 import dev.drimoz.immaterialstorage.drawer.DrawerMenu;
@@ -48,7 +49,9 @@ import java.util.List;
 @PrefixGameTestTemplate(false)
 public final class UpgradeGameTests {
 
-    private static final long BASE = EnergyDrawerBlockEntity.BASE_CAPACITY;
+    private static long base() {
+        return ISConfig.energyBaseCapacity();
+    }
 
     @GameTest(template = PLATFORM)
     public static void storageUpgradesAddTheirMultipliers(GameTestHelper helper) {
@@ -60,10 +63,10 @@ public final class UpgradeGameTests {
         helper.assertTrue(ironMult > 0 && goldMult > 0, "Storage Drawers' storage upgrades report no multiplier");
 
         helper.assertTrue(drawer.installUpgrade(iron), "iron upgrade refused");
-        helper.assertValueEqual(drawer.energy().getCapacityLong(), BASE * ironMult, "capacity with one iron upgrade");
+        helper.assertValueEqual(drawer.energy().getCapacityLong(), base() * ironMult, "capacity with one iron upgrade");
         helper.assertTrue(drawer.installUpgrade(iron), "second iron upgrade refused: storage upgrades stack");
         helper.assertTrue(drawer.installUpgrade(gold), "gold upgrade refused");
-        helper.assertValueEqual(drawer.energy().getCapacityLong(), BASE * (2 * ironMult + goldMult), "capacity with iron, iron, gold");
+        helper.assertValueEqual(drawer.energy().getCapacityLong(), base() * (2 * ironMult + goldMult), "capacity with iron, iron, gold");
         helper.succeed();
     }
 
@@ -82,14 +85,14 @@ public final class UpgradeGameTests {
     public static void anUpgradeThatWouldSpillCannotBeRemoved(GameTestHelper helper) {
         EnergyDrawerBlockEntity drawer = placeDrawer(helper);
         drawer.installUpgrade(sd("iron_storage_upgrade"));
-        drawer.energy().receiveEnergy((int) (BASE + 1), false);
+        drawer.energy().receiveEnergy((int) (base() + 1), false);
 
         helper.assertTrue(drawer.removeUpgrade(0).isEmpty(), "the upgrade came out although the energy no longer fits");
-        helper.assertValueEqual(drawer.energy().getStoredLong(), BASE + 1, "FE after the refused removal");
+        helper.assertValueEqual(drawer.energy().getStoredLong(), base() + 1, "FE after the refused removal");
 
         drawer.energy().extractEnergy(1, false);
         helper.assertFalse(drawer.removeUpgrade(0).isEmpty(), "the upgrade stayed in although the energy fits at base size");
-        helper.assertValueEqual(drawer.energy().getCapacityLong(), BASE, "capacity after removal");
+        helper.assertValueEqual(drawer.energy().getCapacityLong(), base(), "capacity after removal");
         helper.succeed();
     }
 
@@ -100,9 +103,9 @@ public final class UpgradeGameTests {
         helper.assertTrue(drawer.installUpgrade(voidUpgrade), "void upgrade refused");
         helper.assertFalse(drawer.installUpgrade(voidUpgrade), "a second void upgrade was accepted");
 
-        drawer.energy().receiveEnergy((int) BASE, false);
+        drawer.energy().receiveEnergy((int) base(), false);
         helper.assertValueEqual(drawer.energy().receiveEnergy(1_000, false), 1_000, "FE reported accepted by a full void drawer");
-        helper.assertValueEqual(drawer.energy().getStoredLong(), BASE, "FE stored by a full void drawer");
+        helper.assertValueEqual(drawer.energy().getStoredLong(), base(), "FE stored by a full void drawer");
         helper.succeed();
     }
 
@@ -150,7 +153,7 @@ public final class UpgradeGameTests {
 
         use(helper, player, DRAWER);
         helper.assertValueEqual(player.getMainHandItem().getCount(), 2, "upgrades left in hand after installing one");
-        helper.assertTrue(drawer.energy().getCapacityLong() > BASE, "capacity did not grow");
+        helper.assertTrue(drawer.energy().getCapacityLong() > base(), "capacity did not grow");
 
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         player.setShiftKeyDown(true);
@@ -181,7 +184,7 @@ public final class UpgradeGameTests {
 
         // A storage upgrade that the energy depends on cannot be picked up.
         drawer.installUpgrade(sd("iron_storage_upgrade"));
-        drawer.energy().receiveEnergy((int) (BASE + 1), false);
+        drawer.energy().receiveEnergy((int) (base() + 1), false);
         helper.assertFalse(menu.getSlot(1).mayPickup(player), "the storage upgrade can be picked up although the energy would not fit");
         helper.assertTrue(menu.getSlot(0).mayPickup(player), "the void upgrade cannot be picked up");
 
@@ -197,7 +200,7 @@ public final class UpgradeGameTests {
         EnergyDrawerBlockEntity drawer = placeDrawer(helper);
         drawer.installUpgrade(sd("gold_storage_upgrade"));
         long capacity = drawer.energy().getCapacityLong();
-        int stored = (int) (BASE * 2);
+        int stored = (int) (base() * 2);
         drawer.energy().receiveEnergy(stored, false);
 
         ItemStack dropped = breakAndPickUp(helper);

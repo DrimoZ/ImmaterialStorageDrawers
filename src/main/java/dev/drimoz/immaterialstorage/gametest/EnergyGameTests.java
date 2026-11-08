@@ -2,6 +2,7 @@ package dev.drimoz.immaterialstorage.gametest;
 
 import static dev.drimoz.immaterialstorage.gametest.TestSupport.*;
 
+import dev.drimoz.immaterialstorage.ISConfig;
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.StorageDrawersContract;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
@@ -30,7 +31,9 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class EnergyGameTests {
 
-    private static final long BASE = EnergyDrawerBlockEntity.BASE_CAPACITY;
+    private static long base() {
+        return ISConfig.energyBaseCapacity();
+    }
 
     @GameTest(template = PLATFORM)
     public static void aDrawerStoresAndReturnsEnergy(GameTestHelper helper) {
@@ -40,8 +43,8 @@ public final class EnergyGameTests {
 
         helper.assertValueEqual(energy.receiveEnergy(1_000, false), 1_000, "FE accepted");
         helper.assertValueEqual(energy.getEnergyStored(), 1_000, "FE stored");
-        helper.assertValueEqual(energy.receiveEnergy(Integer.MAX_VALUE, false), (int) (BASE - 1_000), "FE accepted when filling up");
-        helper.assertValueEqual(energy.extractEnergy(Integer.MAX_VALUE, false), (int) BASE, "FE extracted when emptying");
+        helper.assertValueEqual(energy.receiveEnergy(Integer.MAX_VALUE, false), (int) (base() - 1_000), "FE accepted when filling up");
+        helper.assertValueEqual(energy.extractEnergy(Integer.MAX_VALUE, false), (int) base(), "FE extracted when emptying");
         helper.assertValueEqual(energy.getEnergyStored(), 0, "FE left");
         helper.succeed();
     }
@@ -93,7 +96,7 @@ public final class EnergyGameTests {
                     }
                     IEnergyStorage controller = energyAt(helper, CONTROLLER);
                     helper.assertValueEqual(controller.getEnergyStored(), 3_000, "FE the controller reports");
-                    helper.assertValueEqual(controller.getMaxEnergyStored(), (int) (3 * BASE), "capacity the controller reports");
+                    helper.assertValueEqual(controller.getMaxEnergyStored(), (int) (3 * base()), "capacity the controller reports");
 
                     helper.assertValueEqual(controller.receiveEnergy(500, false), 500, "FE accepted through the controller");
                     helper.assertValueEqual(controller.extractEnergy(Integer.MAX_VALUE, false), 3_500, "FE extracted through the controller");
@@ -199,4 +202,21 @@ public final class EnergyGameTests {
                 .thenSucceed();
     }
 
+    @GameTest(template = PLATFORM)
+    public static void aDrawerFullerThanItsSizeKeepsItAll(GameTestHelper helper) {
+        // What a lowered base size looks like on load: saved energy above the drawer's capacity now.
+        long saved = 3 * base();
+        CompoundTag energy = new CompoundTag();
+        energy.putLong("Energy", saved);
+        energy.putLong("Capacity", saved);
+        CompoundTag tag = new CompoundTag();
+        tag.put("Energy", energy);
+
+        EnergyDrawerBlockEntity drawer = new EnergyDrawerBlockEntity(helper.absolutePos(DRAWER),
+                ImmaterialStorage.ENERGY_DRAWER.get().defaultBlockState());
+        drawer.loadCustomOnly(tag, helper.getLevel().registryAccess());
+        helper.assertValueEqual(drawer.energy().getStoredLong(), saved, "FE kept by a drawer above its size");
+        helper.assertValueEqual(drawer.energy().receiveEnergy(1_000, false), 0, "FE accepted by a drawer above its size");
+        helper.succeed();
+    }
 }

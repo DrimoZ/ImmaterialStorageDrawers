@@ -15,6 +15,8 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
   fluid inside, the amount on the front, a distinct inventory icon each.
 - **Drops keep everything**: a broken drawer keeps its contents and upgrades in the item.
 - **Jade and The One Probe** show the full energy, past the 2.1 billion FE of the standard API.
+- **Configuration** of the base capacities; the upgrade multipliers come from Storage Drawers' own
+  config.
 
 ## Next
 
@@ -24,9 +26,7 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
 2. **Framed variants.** Storage Drawers' framing table accepts any block that offers itself through
    its public `IFramedSourceBlock`, but rendering a framed block goes through Storage Drawers'
    internal model code, a much heavier dependency than anything else here. To be weighed first.
-3. **Configuration.** Base capacities (500,000 FE, 32,000 mB) are constants; the upgrade
-   multipliers already come from Storage Drawers' own config.
-4. **Store page and README**, in the same style as Immaterial Drawers.
+3. **Store page and README**, in the same style as Immaterial Drawers.
 
 ## Considered, not planned
 

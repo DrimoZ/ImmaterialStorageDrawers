@@ -2,6 +2,7 @@ package dev.drimoz.immaterialstorage.gametest;
 
 import static dev.drimoz.immaterialstorage.gametest.TestSupport.*;
 
+import dev.drimoz.immaterialstorage.ISConfig;
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.StorageDrawersContract;
 import dev.drimoz.immaterialstorage.fluid.FluidDrawerBlockEntity;
@@ -40,7 +41,9 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class FluidGameTests {
 
-    private static final int BASE = FluidDrawerBlockEntity.BASE_CAPACITY;
+    private static int base() {
+        return ISConfig.fluidBaseCapacity();
+    }
 
     private static FluidStack water(int amount) {
         return new FluidStack(Fluids.WATER, amount);
@@ -57,8 +60,8 @@ public final class FluidGameTests {
 
         helper.assertValueEqual(fluids.fill(water(1_000), FluidAction.EXECUTE), 1_000, "water accepted");
         helper.assertValueEqual(fluids.fill(lava(1_000), FluidAction.EXECUTE), 0, "lava accepted into a water drawer");
-        helper.assertValueEqual(fluids.fill(water(BASE), FluidAction.EXECUTE), BASE - 1_000, "water accepted when filling up");
-        helper.assertValueEqual(fluids.drain(BASE * 2, FluidAction.EXECUTE).getAmount(), BASE, "water drained when emptying");
+        helper.assertValueEqual(fluids.fill(water(base()), FluidAction.EXECUTE), base() - 1_000, "water accepted when filling up");
+        helper.assertValueEqual(fluids.drain(base() * 2, FluidAction.EXECUTE).getAmount(), base(), "water drained when emptying");
         helper.assertValueEqual(fluids.fill(lava(500), FluidAction.EXECUTE), 500, "lava accepted once empty");
         helper.succeed();
     }
@@ -87,13 +90,13 @@ public final class FluidGameTests {
         int ironMult = StorageDrawersContract.storageMultiplier(iron);
 
         drawer.installUpgrade(iron);
-        helper.assertValueEqual(drawer.tank().getCapacity(), BASE * ironMult, "capacity with one iron upgrade");
+        helper.assertValueEqual(drawer.tank().getCapacity(), base() * ironMult, "capacity with one iron upgrade");
 
         drawer.installUpgrade(sd("void_upgrade"));
-        drawer.tank().fill(water(BASE * ironMult), FluidAction.EXECUTE);
+        drawer.tank().fill(water(base() * ironMult), FluidAction.EXECUTE);
         helper.assertValueEqual(drawer.tank().fill(water(1_000), FluidAction.EXECUTE), 1_000, "water reported accepted by a full void drawer");
         helper.assertValueEqual(drawer.tank().fill(lava(1_000), FluidAction.EXECUTE), 0, "lava accepted by a void water drawer");
-        helper.assertValueEqual(drawer.tank().getFluidAmount(), BASE * ironMult, "mB in a full void drawer");
+        helper.assertValueEqual(drawer.tank().getFluidAmount(), base() * ironMult, "mB in a full void drawer");
         helper.succeed();
     }
 

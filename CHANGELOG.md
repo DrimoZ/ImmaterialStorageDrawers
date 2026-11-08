@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- Configuration (`immaterialstorage_sd-common.toml`): the base capacity of each drawer, before
+  storage upgrades. The upgrade multipliers stay in Storage Drawers' own config. Lowering a base
+  never deletes anything: a drawer already holding more keeps it all and only refuses more.
 - Fluid Drawer: holds one fluid, 32,000 mB (32 buckets) base, sized by the same Storage Drawers
   upgrades (void and creative included). Buckets and fluid containers fill and empty it by hand;
   pipes reach it on every side. Crafted from smooth stone, buckets and any Storage Drawers drawer.
