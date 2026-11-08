@@ -2,6 +2,7 @@ package dev.drimoz.immaterialstorage;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IControlGroup;
 import com.mojang.logging.LogUtils;
+import dev.drimoz.immaterialstorage.compat.top.TopCompat;
 import dev.drimoz.immaterialstorage.drawer.DrawerMenu;
 import dev.drimoz.immaterialstorage.energy.ControllerEnergyStorage;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlock;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
@@ -78,6 +80,10 @@ public final class ImmaterialStorage {
         MENUS.register(modBus);
         modBus.addListener(ImmaterialStorage::registerCapabilities);
         modBus.addListener(ImmaterialStorage::addToCreativeTab);
+        if (ModList.get().isLoaded("theoneprobe")) {
+            // Only reached with TOP installed, so its classes are never loaded without it.
+            modBus.addListener(TopCompat::register);
+        }
     }
 
     private static void addToCreativeTab(BuildCreativeModeTabContentsEvent event) {

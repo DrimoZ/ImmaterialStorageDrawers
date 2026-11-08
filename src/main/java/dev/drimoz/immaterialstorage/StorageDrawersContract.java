@@ -1,6 +1,8 @@
 package dev.drimoz.immaterialstorage;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityControllerIO;
 import com.jaquadro.minecraft.storagedrawers.config.ModCommonConfig;
 import com.jaquadro.minecraft.storagedrawers.item.EnumUpgradeCreative;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeCreative;
@@ -11,7 +13,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.capabilities.BlockCapability;
+
+import java.util.List;
 
 /**
  * Every point where this mod touches Storage Drawers outside its {@code api} package, in one file.
@@ -64,6 +69,13 @@ public final class StorageDrawersContract {
      */
     public static final ResourceLocation DRAWER_SCREEN_TEXTURE =
             ResourceLocation.fromNamespaceAndPath("storagedrawers", "textures/gui/drawers_1.png");
+
+    /**
+     * The controller and Controller Slave block entity classes, for probe mods that register by
+     * class. Internal Storage Drawers classes, hence here.
+     */
+    public static final List<Class<? extends BlockEntity>> CONTROLLER_CLASSES =
+            List.of(BlockEntityController.class, BlockEntityControllerIO.class);
 
     /** Storage Drawers' creative tab, where our blocks are listed after theirs. */
     public static final ResourceKey<CreativeModeTab> CREATIVE_TAB = ResourceKey.create(Registries.CREATIVE_MODE_TAB,

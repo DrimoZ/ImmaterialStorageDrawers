@@ -2,6 +2,8 @@ package dev.drimoz.immaterialstorage.gametest;
 
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.StorageDrawersContract;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
+import dev.drimoz.immaterialstorage.compat.EnergyReading;
 import dev.drimoz.immaterialstorage.energy.ControllerEnergyStorage;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -119,6 +121,34 @@ public final class EnergyGameTests {
                     helper.assertValueEqual(energyAt(helper, slave).getEnergyStored(), 777, "FE the slave reports");
                     helper.assertValueEqual(energyAt(helper, slave).extractEnergy(700, false), 700, "FE extracted through the slave");
                     helper.assertValueEqual(energyAt(helper, drawer).getEnergyStored(), 77, "FE left in the drawer");
+                })
+                .thenSucceed();
+    }
+
+    /** What Jade and The One Probe show: the full long figures, and nothing on a controller without Energy Drawers. */
+    @GameTest(template = PLATFORM)
+    public static void probesReadTheFullAmountAndSkipEmptyControllers(GameTestHelper helper) {
+        placeController(helper);
+        helper.startSequence()
+                .thenIdle(SETTLE_TICKS)
+                .thenExecute(() -> {
+                    helper.assertTrue(EnergyReading.of(helper.getBlockEntity(CONTROLLER)) == null,
+                            "a controller without Energy Drawers reads as an energy block");
+                    helper.setBlock(CONTROLLER.east(), ImmaterialStorage.ENERGY_DRAWER.get());
+                    // The new drawer joins at the next rebuild; ask for it rather than wait 100 ticks.
+                    ((BlockEntityController) helper.getBlockEntity(CONTROLLER)).updateCache();
+
+                    CompoundTag tag = new CompoundTag();
+                    tag.putLong("Energy", 3_000_000_000L);
+                    tag.putLong("Capacity", 4_000_000_000L);
+                    drawerAt(helper, CONTROLLER.east()).energy().deserializeNBT(helper.getLevel().registryAccess(), tag);
+
+                    EnergyReading drawer = EnergyReading.of(helper.getBlockEntity(CONTROLLER.east()));
+                    helper.assertTrue(drawer != null && drawer.stored() == 3_000_000_000L && drawer.capacity() == 4_000_000_000L,
+                            "the drawer reading is not the full long amount: " + drawer);
+                    EnergyReading network = EnergyReading.of(helper.getBlockEntity(CONTROLLER));
+                    helper.assertTrue(network != null && network.stored() == 3_000_000_000L,
+                            "the controller reading is not the network total: " + network);
                 })
                 .thenSucceed();
     }
