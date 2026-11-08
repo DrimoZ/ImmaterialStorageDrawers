@@ -6,13 +6,22 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
-/** Client-side registrations. Both events are mod-bus events, which NeoForge routes on its own. */
+/** Client-side registrations. All mod-bus events, which NeoForge routes on its own. */
 @EventBusSubscriber(modid = ImmaterialStorage.MOD_ID, value = Dist.CLIENT)
 public final class ISClientSetup {
 
+    /** Vanilla's water colour in the default biome: the Fluid Drawer icon's water is tinted with it. */
+    private static final int WATER_COLOR = 0xFF3F76E4;
+
     private ISClientSetup() {
+    }
+
+    @SubscribeEvent
+    public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
+        event.register((stack, tintIndex) -> tintIndex == 0 ? WATER_COLOR : -1, ImmaterialStorage.FLUID_DRAWER_ITEM.get());
     }
 
     @SubscribeEvent

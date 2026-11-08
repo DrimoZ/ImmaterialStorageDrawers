@@ -14,6 +14,8 @@
   in Storage Drawers' style (controller stone, 1 px trim rim) around a deep niche where an energy
   cube turns: its core glows and spins faster as the drawer fills. The amount (stored / capacity)
   is written under it.
+- Each drawer has its own inventory icon: the energy cube in its niche for the Energy Drawer,
+  water in its niche for the Fluid Drawer.
 - A broken Energy Drawer keeps its energy and upgrades in the dropped item and gets them back when
   placed. An empty one drops a plain item that stacks. Its tooltip shows the energy and the number
   of upgrades it holds.

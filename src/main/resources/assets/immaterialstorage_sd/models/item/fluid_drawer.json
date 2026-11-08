@@ -1,1 +1,26 @@
-{ "parent": "immaterialstorage_sd:block/drawer_niche" }
+{
+  "__comment": "Inventory icon: the shared niche half full of water (vanilla's still water, tinted by the item colour handler), so the item reads as fluid at a glance. The placed block draws its real contents with FluidDrawerRenderer instead.",
+  "parent": "block/block",
+  "loader": "neoforge:composite",
+  "children": {
+    "niche": {
+      "parent": "immaterialstorage_sd:block/drawer_niche"
+    },
+    "fluid": {
+      "render_type": "minecraft:translucent",
+      "textures": {
+        "fluid": "minecraft:block/water_still"
+      },
+      "elements": [
+        {
+          "from": [1, 1, 1],
+          "to": [15, 9, 10],
+          "faces": {
+            "north": { "uv": [1, 7, 15, 15], "texture": "#fluid", "tintindex": 0 },
+            "up":    { "uv": [1, 1, 15, 10], "texture": "#fluid", "tintindex": 0 }
+          }
+        }
+      ]
+    }
+  }
+}
