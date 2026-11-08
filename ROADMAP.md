@@ -15,17 +15,18 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
   fluid inside, the amount on the front, a distinct inventory icon each.
 - **Drops keep everything**: a broken drawer keeps its contents and upgrades in the item.
 - **Jade and The One Probe** show the full energy, past the 2.1 billion FE of the standard API.
+- **Framing** at Storage Drawers' framing table, through its own frame data; the frame is drawn by
+  a model of ours, not by Storage Drawers' internal model code.
 - **Configuration** of the base capacities; the upgrade multipliers come from Storage Drawers' own
   config.
 
 ## Next
 
-1. **Looked at in a world.** Every render (both drawers, the screen, the icons, the probe bars) has
-   only been checked to load without errors, never seen. Orientation, light and readability come
+1. **Looked at in a world.** Every render (both drawers, framed or not, the screen, the icons, the
+   probe bars) has only been checked to load without errors, never seen. Orientation, light and readability come
    first, before anything is added on top.
-2. **Framed variants.** Storage Drawers' framing table accepts any block that offers itself through
-   its public `IFramedSourceBlock`, but rendering a framed block goes through Storage Drawers'
-   internal model code, a much heavier dependency than anything else here. To be weighed first.
+2. **Framed inventory icons.** A framed drawer's item shows the plain icon; drawing the frame on it
+   means wrapping the composite item models too.
 3. **Store page and README**, in the same style as Immaterial Drawers.
 
 ## Considered, not planned

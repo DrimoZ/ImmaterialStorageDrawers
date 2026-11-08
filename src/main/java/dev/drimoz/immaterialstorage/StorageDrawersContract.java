@@ -1,6 +1,14 @@
 package dev.drimoz.immaterialstorage;
 
+import com.jaquadro.minecraft.storagedrawers.api.framing.IFramedBlock;
+import com.jaquadro.minecraft.storagedrawers.api.framing.IFramedMaterials;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
+import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.MaterialData;
+import com.jaquadro.minecraft.storagedrawers.block.tile.util.FrameHelper;
+import com.jaquadro.minecraft.storagedrawers.components.item.FrameData;
+import com.jaquadro.minecraft.storagedrawers.core.ModDataComponents;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityControllerIO;
 import com.jaquadro.minecraft.storagedrawers.config.ModCommonConfig;
@@ -137,6 +145,45 @@ public final class StorageDrawersContract {
             }
         }
         return true;
+    }
+
+    // --- Framing: Storage Drawers' own frame data, so its framing table frames and unframes our
+    // drawers exactly like its own. The holder is typed by their public IFramedMaterials; its
+    // internal implementation (MaterialData, FrameData, the frame_data component) stays here. ---
+
+    /** An empty frame, in Storage Drawers' own holder. */
+    public static IFramedMaterials newFrame() {
+        return new MaterialData();
+    }
+
+    public static boolean isFramed(IFramedMaterials frame) {
+        return !((MaterialData) frame).isEmpty();
+    }
+
+    /** The framed drawer the framing table hands out, built by Storage Drawers' own helper. */
+    public static ItemStack makeFramedItem(IFramedBlock result, ItemStack source, ItemStack side, ItemStack trim, ItemStack front) {
+        return FrameHelper.makeFramedItem(result, source, side, trim, front);
+    }
+
+    /** The frame a framing table wrote on a drawer item, replacing the holder's; empty when none. */
+    public static void readFrame(IFramedMaterials frame, ItemStack stack) {
+        ((MaterialData) frame).read(stack);
+    }
+
+    /** Writes the frame on an item as Storage Drawers' framed blocks drop it; nothing when unframed. */
+    public static void writeFrame(IFramedMaterials frame, ItemStack stack) {
+        if (isFramed(frame)) {
+            stack.set(ModDataComponents.FRAME_DATA.get(), new FrameData((MaterialData) frame));
+        }
+    }
+
+    public static CompoundTag saveFrame(IFramedMaterials frame, HolderLookup.Provider registries) {
+        return ((MaterialData) frame).write(registries, new CompoundTag());
+    }
+
+    /** Replaces the holder's frame; an empty tag clears it. */
+    public static void loadFrame(IFramedMaterials frame, HolderLookup.Provider registries, CompoundTag tag) {
+        ((MaterialData) frame).read(registries, tag);
     }
 
     // --- Text ---

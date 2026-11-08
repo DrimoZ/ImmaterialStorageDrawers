@@ -8,6 +8,7 @@ saying so.
 Storage Drawers
 Copyright (c) 2014 Justin Aquadro
 Licensed under the MIT License.
+(client/FramedDrawerModel.java adapts the UV remapping of its SpriteReplacementModel.)
 
 Functional Storage (storage/BigEnergyStorage.java is adapted from its fluid/BigFluidHandler, by way
 of Immaterial Drawers)

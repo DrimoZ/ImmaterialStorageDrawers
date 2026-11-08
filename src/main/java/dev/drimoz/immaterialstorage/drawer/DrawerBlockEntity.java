@@ -1,5 +1,9 @@
 package dev.drimoz.immaterialstorage.drawer;
 
+import com.jaquadro.minecraft.storagedrawers.api.framing.FrameMaterial;
+import com.jaquadro.minecraft.storagedrawers.api.framing.IFramedBlockEntity;
+import com.jaquadro.minecraft.storagedrawers.api.framing.IFramedMaterials;
+import dev.drimoz.immaterialstorage.StorageDrawersContract;
 import dev.drimoz.immaterialstorage.network.NetworkNodeBlockEntity;
 import dev.drimoz.immaterialstorage.upgrade.DrawerUpgrades;
 import net.minecraft.core.BlockPos;
@@ -7,22 +11,39 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelProperty;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
- * What every drawer of ours shares, whatever it stores: Storage Drawers' upgrades, saving, and the
- * client sync.
+ * What every drawer of ours shares, whatever it stores: Storage Drawers' upgrades, its frame (from
+ * Storage Drawers' framing table), saving, and the client sync.
  *
  * <p>Subclasses own the content (energy, fluid) and say how upgrades size it. Not this class's job:
  * any unit, any capability.
  */
-public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity {
+public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity implements IFramedBlockEntity {
 
     private static final String UPGRADES_TAG = "Upgrades";
+    private static final String FRAME_TAG = "Frame";
+
+    /** The frame's look, for the block model; absent when the drawer is not framed. */
+    public static final ModelProperty<FrameLook> FRAME_LOOK = new ModelProperty<>();
+
+    /**
+     * The blocks whose textures a framed drawer wears, trim and front falling back to the side as
+     * in Storage Drawers. Blocks, not stacks, so two looks compare by identity.
+     */
+    public record FrameLook(Block side, Block trim, Block front) {
+    }
 
     /**
      * Ticks between two client syncs of the content. A pipe can change it every tick; one packet per
@@ -31,10 +52,49 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity {
     private static final int SYNC_INTERVAL = 10;
 
     private final DrawerUpgrades upgrades = new DrawerUpgrades();
+    private final IFramedMaterials frame = StorageDrawersContract.newFrame();
     private boolean syncPending;
 
     protected DrawerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+    }
+
+    /** The frame, in Storage Drawers' own holder; empty when the drawer is not framed. */
+    @Override
+    public IFramedMaterials material() {
+        return frame;
+    }
+
+    @Nullable
+    public FrameLook frameLook() {
+        Block side = blockOf(frame.getMaterial(FrameMaterial.SIDE));
+        if (side == null) {
+            return null;
+        }
+        Block trim = blockOf(frame.getMaterial(FrameMaterial.TRIM));
+        Block front = blockOf(frame.getMaterial(FrameMaterial.FRONT));
+        return new FrameLook(side, trim != null ? trim : side, front != null ? front : side);
+    }
+
+    @Nullable
+    private static Block blockOf(ItemStack stack) {
+        return stack.getItem() instanceof BlockItem item ? item.getBlock() : null;
+    }
+
+    @Override
+    public ModelData getModelData() {
+        FrameLook look = frameLook();
+        return look == null ? ModelData.EMPTY : ModelData.builder().with(FRAME_LOOK, look).build();
+    }
+
+    /**
+     * The block entity data a dropped drawer keeps, without the frame: the frame travels in Storage
+     * Drawers' own item component instead, so that their framing table can take it off.
+     */
+    public CompoundTag saveForDrop(HolderLookup.Provider registries) {
+        CompoundTag tag = saveCustomOnly(registries);
+        tag.remove(FRAME_TAG);
+        return tag;
     }
 
     public DrawerUpgrades upgrades() {
@@ -144,6 +204,9 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity {
         super.saveAdditional(tag, registries);
         saveContent(tag, registries);
         tag.put(UPGRADES_TAG, upgrades.save(registries));
+        if (StorageDrawersContract.isFramed(frame)) {
+            tag.put(FRAME_TAG, StorageDrawersContract.saveFrame(frame, registries));
+        }
     }
 
     @Override
@@ -152,7 +215,15 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity {
         loadContent(tag, registries);
         upgrades.load(registries, tag.getList(UPGRADES_TAG, Tag.TAG_COMPOUND));
         // Recomputed rather than trusted: the multipliers live in Storage Drawers' config, which can
-        // change between sessions. A lowered config clamps the contents.
+        // change between sessions.
         applyUpgrades();
+
+        FrameLook before = frameLook();
+        StorageDrawersContract.loadFrame(frame, registries, tag.getCompound(FRAME_TAG));
+        if (level != null && level.isClientSide && !Objects.equals(before, frameLook())) {
+            // Only on a new look: content syncs arrive every 10 ticks and must not re-mesh the chunk.
+            requestModelDataUpdate();
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
+        }
     }
 }

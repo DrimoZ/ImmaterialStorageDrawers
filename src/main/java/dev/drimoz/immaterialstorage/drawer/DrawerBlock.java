@@ -1,5 +1,12 @@
 package dev.drimoz.immaterialstorage.drawer;
 
+import com.jaquadro.minecraft.storagedrawers.api.framing.FrameMaterial;
+import com.jaquadro.minecraft.storagedrawers.api.framing.IFramedBlock;
+import com.jaquadro.minecraft.storagedrawers.api.framing.IFramedBlockEntity;
+import com.jaquadro.minecraft.storagedrawers.api.framing.IFramedSourceBlock;
+import dev.drimoz.immaterialstorage.StorageDrawersContract;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.LevelReader;
 import dev.drimoz.immaterialstorage.network.NetworkNodeBlock;
 import dev.drimoz.immaterialstorage.upgrade.DrawerUpgrades;
 import net.minecraft.ChatFormatting;
@@ -34,6 +41,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -48,8 +56,13 @@ import java.util.List;
  * <p>Broken, a drawer keeps its contents and upgrades in the dropped item (vanilla's block entity
  * data component, applied back on placement), so breaking one never destroys anything. An empty
  * drawer drops a plain, stackable item.
+ *
+ * <p>Storage Drawers' framing table frames it like one of its own drawers (side, trim, front). The
+ * frame is the same block in another look, not a separate framed block: it lives in Storage Drawers'
+ * own frame component on the item, so their table also takes it off, and contents and upgrades
+ * stay through both.
  */
-public abstract class DrawerBlock extends NetworkNodeBlock {
+public abstract class DrawerBlock extends NetworkNodeBlock implements IFramedSourceBlock, IFramedBlock {
 
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
@@ -140,14 +153,49 @@ public abstract class DrawerBlock extends NetworkNodeBlock {
     }
 
     @Override
+    public ItemStack makeFramedItem(ItemStack source, ItemStack side, ItemStack trim, ItemStack front) {
+        return StorageDrawersContract.makeFramedItem(this, source, side, trim, front);
+    }
+
+    @Override
+    public IFramedBlockEntity getFramedBlockEntity(Level level, BlockPos pos) {
+        return level.getBlockEntity(pos) instanceof DrawerBlockEntity drawer ? drawer : null;
+    }
+
+    @Override
+    public boolean supportsFrameMaterial(FrameMaterial material) {
+        return true;
+    }
+
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (level.getBlockEntity(pos) instanceof DrawerBlockEntity drawer) {
+            StorageDrawersContract.readFrame(drawer.material(), stack);
+            drawer.setChanged();
+        }
+    }
+
+    @Override
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+        ItemStack stack = super.getCloneItemStack(state, target, level, pos, player);
+        if (level.getBlockEntity(pos) instanceof DrawerBlockEntity drawer) {
+            StorageDrawersContract.writeFrame(drawer.material(), stack);
+        }
+        return stack;
+    }
+
+    @Override
     protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         List<ItemStack> drops = super.getDrops(state, params);
-        if (params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) instanceof DrawerBlockEntity drawer
-                && !drawer.isEmpty()) {
+        if (params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) instanceof DrawerBlockEntity drawer) {
             for (ItemStack drop : drops) {
                 if (drop.is(asItem())) {
-                    BlockItem.setBlockEntityData(drop, drawer.getType(),
-                            drawer.saveCustomOnly(params.getLevel().registryAccess()));
+                    if (!drawer.isEmpty()) {
+                        BlockItem.setBlockEntityData(drop, drawer.getType(),
+                                drawer.saveForDrop(params.getLevel().registryAccess()));
+                    }
+                    StorageDrawersContract.writeFrame(drawer.material(), drop);
                 }
             }
         }

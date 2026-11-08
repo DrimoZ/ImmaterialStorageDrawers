@@ -1,6 +1,9 @@
 package dev.drimoz.immaterialstorage.client;
 
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
+import net.minecraft.client.renderer.block.BlockModelShaper;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -8,6 +11,8 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+
+import java.util.List;
 
 /** Client-side registrations. All mod-bus events, which NeoForge routes on its own. */
 @EventBusSubscriber(modid = ImmaterialStorage.MOD_ID, value = Dist.CLIENT)
@@ -41,6 +46,17 @@ public final class ISClientSetup {
      * The cube's two halves. No block or item points at them, so nothing would load them otherwise,
      * and an unregistered model comes back as the missing model, not an error.
      */
+    /** Every state of our drawers wears its frame, when it has one. */
+    @SubscribeEvent
+    public static void wrapFramedModels(ModelEvent.ModifyBakingResult event) {
+        for (Block block : List.of(ImmaterialStorage.ENERGY_DRAWER.get(), ImmaterialStorage.FLUID_DRAWER.get())) {
+            for (BlockState state : block.getStateDefinition().getPossibleStates()) {
+                event.getModels().computeIfPresent(BlockModelShaper.stateToModelLocation(state),
+                        (location, plain) -> new FramedDrawerModel(plain));
+            }
+        }
+    }
+
     @SubscribeEvent
     public static void registerModels(ModelEvent.RegisterAdditional event) {
         event.register(EnergyDrawerRenderer.CUBE_FRAME);
