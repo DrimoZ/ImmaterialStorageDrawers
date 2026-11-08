@@ -5,6 +5,7 @@ import com.mojang.logging.LogUtils;
 import dev.drimoz.immaterialstorage.compat.top.TopCompat;
 import dev.drimoz.immaterialstorage.chemical.ChemicalContent;
 import dev.drimoz.immaterialstorage.compat.Mods;
+import dev.drimoz.immaterialstorage.source.SourceContent;
 import dev.drimoz.immaterialstorage.drawer.Compartments;
 import dev.drimoz.immaterialstorage.drawer.DrawerMenu;
 import dev.drimoz.immaterialstorage.energy.ControllerEnergyStorage;
@@ -100,6 +101,10 @@ public final class ImmaterialStorage {
         if (Mods.mekanism()) {
             // Only reached with Mekanism installed, so its classes are never loaded without it.
             ChemicalContent.register(modBus);
+        }
+        if (Mods.arsNouveau()) {
+            // Same for Ars Nouveau.
+            SourceContent.register(modBus);
         }
         modBus.addListener(ImmaterialStorage::addToCreativeTab);
         if (ModList.get().isLoaded("theoneprobe")) {

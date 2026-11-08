@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "immaterialstorage_sd:block/source_drawer" },
+    "facing=south": { "model": "immaterialstorage_sd:block/source_drawer", "y": 180 },
+    "facing=west": { "model": "immaterialstorage_sd:block/source_drawer", "y": 270 },
+    "facing=east": { "model": "immaterialstorage_sd:block/source_drawer", "y": 90 }
+  }
+}

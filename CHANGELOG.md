@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- Source Drawer (with Ars Nouveau installed, optional): 32,000 Source base (configurable), Storage
+  Drawers' upgrades included. Relays and turrets reach it through Ars's Source capability; the
+  enchanting apparatus, imbuement and sourcelinks find it nearby like a Source Jar; controllers expose
+  the Source of their whole network. Without Ars Nouveau, nothing of this is loaded.
 - Chemical Drawers (with Mekanism installed, optional): 1x1, 1x2 and 2x2, one Mekanism chemical (gas,
   infuse type, pigment or slurry) per compartment, 32,000 mB base (configurable), Storage Drawers'
   upgrades included. Tubes and machines reach them on every side; a chemical tank in hand empties

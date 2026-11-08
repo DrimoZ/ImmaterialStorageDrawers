@@ -8,7 +8,9 @@
   "block.immaterialstorage_sd.chemical_drawer": "Chemical Drawer",
   "block.immaterialstorage_sd.chemical_drawer_2": "Chemical Drawer 1x2",
   "block.immaterialstorage_sd.chemical_drawer_4": "Chemical Drawer 2x2",
+  "block.immaterialstorage_sd.source_drawer": "Source Drawer",
   "tooltip.immaterialstorage_sd.fluid": "%s: %s / %s mB",
   "tooltip.immaterialstorage_sd.empty": "Empty",
-  "tooltip.immaterialstorage_sd.chemical": "%s: %s / %s mB"
+  "tooltip.immaterialstorage_sd.chemical": "%s: %s / %s mB",
+  "tooltip.immaterialstorage_sd.source": "%s / %s Source"
 }

@@ -16,6 +16,10 @@
     {
       "id": "immaterialstorage_sd:chemical_drawer_4",
       "required": false
+    },
+    {
+      "id": "immaterialstorage_sd:source_drawer",
+      "required": false
     }
   ]
 }

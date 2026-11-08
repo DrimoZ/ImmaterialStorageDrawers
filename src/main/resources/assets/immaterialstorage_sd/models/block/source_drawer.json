@@ -1,0 +1,7 @@
+{
+  "__comment": "The Source Drawer: the shared drawer body, with Immaterial Drawers' Source drawer front.",
+  "parent": "immaterialstorage_sd:block/drawer_body",
+  "textures": {
+    "front": "immaterialstorage_sd:block/source_drawer_front"
+  }
+}

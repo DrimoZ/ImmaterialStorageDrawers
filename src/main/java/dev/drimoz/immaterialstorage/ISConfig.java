@@ -29,6 +29,11 @@ public final class ISConfig {
                     "Storage upgrades multiply it by Storage Drawers' own multipliers; compartments share it.")
             .defineInRange("chemicalDrawerBaseCapacity", 32_000L, 1L, Long.MAX_VALUE);
 
+    private static final ModConfigSpec.IntValue SOURCE_BASE = BUILDER
+            .comment("Source a Source Drawer holds with no storage upgrade (Ars Nouveau installed).",
+                    "Storage upgrades multiply it by Storage Drawers' own multipliers; Ars's API stops at 2,147,483,647.")
+            .defineInRange("sourceDrawerBaseCapacity", 32_000, 1, Integer.MAX_VALUE);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ISConfig() {
@@ -44,5 +49,9 @@ public final class ISConfig {
 
     public static long chemicalBaseCapacity() {
         return CHEMICAL_BASE.getAsLong();
+    }
+
+    public static int sourceBaseCapacity() {
+        return SOURCE_BASE.getAsInt();
     }
 }

@@ -44,3 +44,12 @@ type = "optional"
 versionRange = "[10.7,)"
 ordering = "AFTER"
 side = "BOTH"
+
+# Optional, for the Source Drawer, on the same terms as Mekanism above. 5.13 is the release the
+# Source API was read from (ISourceCap, SourceManager).
+[[dependencies.${mod_id}]]
+modId = "ars_nouveau"
+type = "optional"
+versionRange = "[5.13,)"
+ordering = "AFTER"
+side = "BOTH"

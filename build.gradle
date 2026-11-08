@@ -73,6 +73,15 @@ dependencies {
     if (!project.hasProperty("noMekanism")) {
         runtimeOnly "maven.modrinth:mekanism:${mekanism_version}"
     }
+
+    // Ars Nouveau, same arrangement, for the Source Drawer: behind Mods.arsNouveau(). `-PnoArs` drops
+    // it (and the two mods it needs) from the run, to exercise the absent path.
+    compileOnly "maven.modrinth:ars-nouveau:${ars_nouveau_version}"
+    if (!project.hasProperty("noArs")) {
+        runtimeOnly "maven.modrinth:ars-nouveau:${ars_nouveau_version}"
+        runtimeOnly "maven.modrinth:curios:${curios_version}"
+        runtimeOnly "maven.modrinth:geckolib:${geckolib_version}"
+    }
 }
 
 // Expand gradle.properties into neoforge.mods.toml so versions live in one place.
