@@ -1,0 +1,29 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "mekanism"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "T#T",
+    "#X#",
+    "T#T"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:smooth_stone"
+    },
+    "T": {
+      "item": "mekanism:basic_chemical_tank"
+    },
+    "X": {
+      "tag": "storagedrawers:drawers"
+    }
+  },
+  "result": {
+    "id": "immaterialstorage_sd:chemical_drawer_4"
+  }
+}

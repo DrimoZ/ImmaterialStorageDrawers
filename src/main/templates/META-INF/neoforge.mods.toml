@@ -33,3 +33,14 @@ type = "required"
 versionRange = "[13.11.4,)"
 ordering = "AFTER"
 side = "BOTH"
+
+# Optional, for the Chemical Drawers: without it they are never registered and no class touching its
+# API is loaded. Declared so a release before the unified Chemical API (10.7) is a loader message,
+# not a crash, and AFTER so its chemical registry exists before our blocks. No upper bound: on an
+# optional dependency, one would refuse to launch the whole pack the day Mekanism ships a 10.8.
+[[dependencies.${mod_id}]]
+modId = "mekanism"
+type = "optional"
+versionRange = "[10.7,)"
+ordering = "AFTER"
+side = "BOTH"

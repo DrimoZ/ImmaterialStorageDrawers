@@ -16,10 +16,14 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * A drawer's upgrade screen, drawn on Storage Drawers' own screen for that many drawers (1, 2 or 4)
@@ -28,6 +32,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
  * <p>It reads like theirs: what each compartment holds sits in its slot as an item would (a fluid is
  * its still texture; energy is the drawer's own energy cube, turning), the field beside them gives
  * a compartment's capacity as theirs gives a drawer's, and hovering a slot gives its exact figures.
+ * How each kind of drawer is shown is its {@link ContentView}; optional modules register theirs.
  */
 public class DrawerScreen extends AbstractContainerScreen<DrawerMenu> {
 
@@ -45,11 +50,79 @@ public class DrawerScreen extends AbstractContainerScreen<DrawerMenu> {
     private static final float CUBE_PIXELS = 15f;
     private static final float CUBE_TILT = 25f;
 
+    /**
+     * What the screen shows of one kind of drawer: each compartment's icon, its exact figures on
+     * hover, and a compartment's capacity for the field.
+     */
+    public interface ContentView<T extends DrawerBlockEntity> {
+        void drawIcon(GuiGraphics graphics, T drawer, int compartment, int x, int y, float partialTick);
+
+        Component describe(T drawer, int compartment);
+
+        String capacity(T drawer);
+    }
+
+    private static final Map<Class<?>, ContentView<?>> VIEWS = new LinkedHashMap<>();
+
+    /** Registers how the screen shows a kind of drawer; called once per kind, at client setup. */
+    public static <T extends DrawerBlockEntity> void registerView(Class<T> kind, ContentView<T> view) {
+        VIEWS.put(kind, view);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static ContentView<DrawerBlockEntity> viewOf(DrawerBlockEntity drawer) {
+        return (ContentView<DrawerBlockEntity>) VIEWS.entrySet().stream()
+                .filter(entry -> entry.getKey().isInstance(drawer)).findFirst()
+                .map(Map.Entry::getValue).orElseThrow(() -> new IllegalStateException("no screen view for " + drawer));
+    }
+
+    static {
+        registerView(EnergyDrawerBlockEntity.class, new ContentView<>() {
+            @Override
+            public void drawIcon(GuiGraphics graphics, EnergyDrawerBlockEntity drawer, int compartment, int x, int y, float partialTick) {
+                long capacity = drawer.energy().getCapacityLong();
+                float progress = capacity <= 0 ? 0 : (float) Math.min(1d, drawer.energy().getStoredLong() / (double) capacity);
+                cube(graphics, x, y, progress, partialTick);
+            }
+
+            @Override
+            public Component describe(EnergyDrawerBlockEntity drawer, int compartment) {
+                return EnergyDrawerBlockEntity.describe(drawer.energy().getStoredLong(), drawer.energy().getCapacityLong());
+            }
+
+            @Override
+            public String capacity(EnergyDrawerBlockEntity drawer) {
+                return StorageDrawersContract.formatCount(drawer.energy().getCapacityLong()) + " FE";
+            }
+        });
+        registerView(FluidDrawerBlockEntity.class, new ContentView<>() {
+            @Override
+            public void drawIcon(GuiGraphics graphics, FluidDrawerBlockEntity drawer, int compartment, int x, int y, float partialTick) {
+                FluidStack fluid = drawer.tanks().get(compartment).getFluid();
+                if (!fluid.isEmpty()) {
+                    IClientFluidTypeExtensions client = IClientFluidTypeExtensions.of(fluid.getFluid());
+                    drawSprite(graphics, client.getStillTexture(fluid), client.getTintColor(fluid), x, y);
+                }
+            }
+
+            @Override
+            public Component describe(FluidDrawerBlockEntity drawer, int compartment) {
+                DrawerFluidTank tank = drawer.tanks().get(compartment);
+                return FluidDrawerBlockEntity.describe(tank.getFluid(), tank.getCapacity());
+            }
+
+            @Override
+            public String capacity(FluidDrawerBlockEntity drawer) {
+                return StorageDrawersContract.formatCount(drawer.tanks().get(0).getCapacity()) + " mB";
+            }
+        });
+    }
+
     private final Compartments compartments;
 
     public DrawerScreen(DrawerMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        this.compartments = menu.drawer() instanceof FluidDrawerBlockEntity fluids ? fluids.compartments() : Compartments.ONE;
+        this.compartments = menu.drawer().compartments();
         imageWidth = 176;
         imageHeight = 199;
         inventoryLabelY = imageHeight - 94;
@@ -61,7 +134,7 @@ public class DrawerScreen extends AbstractContainerScreen<DrawerMenu> {
         renderTooltip(graphics, mouseX, mouseY);
         for (int i = 0; i < compartments.count(); i++) {
             if (isHovering(compartments.screenSlotX(i), compartments.screenSlotY(i), SLOT_SIZE, SLOT_SIZE, mouseX, mouseY)) {
-                graphics.renderTooltip(font, exactAmount(menu.drawer(), i), mouseX, mouseY);
+                graphics.renderTooltip(font, viewOf(menu.drawer()).describe(menu.drawer(), i), mouseX, mouseY);
             }
         }
     }
@@ -76,34 +149,23 @@ public class DrawerScreen extends AbstractContainerScreen<DrawerMenu> {
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         graphics.blit(compartments.screenTexture(), leftPos, topPos, 0, 0, imageWidth, imageHeight);
         DrawerBlockEntity drawer = menu.drawer();
-        if (drawer instanceof EnergyDrawerBlockEntity energy) {
-            long capacity = energy.energy().getCapacityLong();
-            float progress = capacity <= 0 ? 0 : (float) Math.min(1d, energy.energy().getStoredLong() / (double) capacity);
-            cube(graphics, leftPos + compartments.screenSlotX(0), topPos + compartments.screenSlotY(0), progress, partialTick);
-            field(graphics, StorageDrawersContract.formatCount(capacity) + " FE");
-        } else if (drawer instanceof FluidDrawerBlockEntity fluids) {
-            for (int i = 0; i < compartments.count(); i++) {
-                fluidIcon(graphics, fluids.tanks().get(i).getFluid(),
-                        leftPos + compartments.screenSlotX(i), topPos + compartments.screenSlotY(i));
-            }
-            field(graphics, StorageDrawersContract.formatCount(fluids.tanks().get(0).getCapacity()) + " mB");
+        ContentView<DrawerBlockEntity> view = viewOf(drawer);
+        for (int i = 0; i < compartments.count(); i++) {
+            view.drawIcon(graphics, drawer, i, leftPos + compartments.screenSlotX(i), topPos + compartments.screenSlotY(i), partialTick);
         }
+        field(graphics, view.capacity(drawer));
     }
 
-    private static void fluidIcon(GuiGraphics graphics, FluidStack fluid, int x, int y) {
-        if (fluid.isEmpty()) {
-            return;
-        }
-        IClientFluidTypeExtensions client = IClientFluidTypeExtensions.of(fluid.getFluid());
-        int color = client.getTintColor(fluid);
-        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
-                .apply(client.getStillTexture(fluid));
+    /** A block-atlas sprite filling a slot, as an item icon would, tinted. */
+    public static void drawSprite(GuiGraphics graphics, ResourceLocation texture, int color, int x, int y) {
+        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
         graphics.blit(x, y, 0, SLOT_SIZE, SLOT_SIZE, sprite,
                 (color >> 16 & 0xFF) / 255f, (color >> 8 & 0xFF) / 255f, (color & 0xFF) / 255f, (color >>> 24) / 255f);
     }
 
     /** The energy cube in the slot, as an item icon: lit for items, turning like the one in the drawer. */
-    private void cube(GuiGraphics graphics, int x, int y, float progress, float partialTick) {
+    private static void cube(GuiGraphics graphics, int x, int y, float progress, float partialTick) {
+        Minecraft minecraft = Minecraft.getInstance();
         float time = minecraft.level == null ? 0 : minecraft.level.getGameTime() % 72000L + partialTick;
         float scale = CUBE_PIXELS / (9f / 16f);
         var pose = graphics.pose();
@@ -128,16 +190,5 @@ public class DrawerScreen extends AbstractContainerScreen<DrawerMenu> {
         pose.scale(scale, scale, 1f);
         graphics.drawString(font, text, -font.width(text) / 2, 0, LABEL_COLOR, false);
         pose.popPose();
-    }
-
-    private static Component exactAmount(DrawerBlockEntity drawer, int compartment) {
-        if (drawer instanceof EnergyDrawerBlockEntity energy) {
-            return EnergyDrawerBlockEntity.describe(energy.energy().getStoredLong(), energy.energy().getCapacityLong());
-        }
-        if (drawer instanceof FluidDrawerBlockEntity fluids) {
-            DrawerFluidTank tank = fluids.tanks().get(compartment);
-            return FluidDrawerBlockEntity.describe(tank.getFluid(), tank.getCapacity());
-        }
-        return Component.empty();
     }
 }

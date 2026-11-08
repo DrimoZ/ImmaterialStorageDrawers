@@ -7,7 +7,12 @@ import dev.drimoz.immaterialstorage.drawer.DrawerBlock;
 import dev.drimoz.immaterialstorage.drawer.DrawerBlockEntity;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LevelRenderer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.Direction;
 
@@ -67,5 +72,56 @@ final class DrawerRendering {
         font.drawInBatch(text, -font.width(text) / 2f, 0, 0xFFFFFFFF, false, pose.last().pose(), buffers,
                 Font.DisplayMode.POLYGON_OFFSET, 0, LightTexture.FULL_BRIGHT);
         pose.popPose();
+    }
+
+    /**
+     * Depth of every tank: Functional Storage's fluid drawer tanks run from just behind the front
+     * frame to 14.5 px deep. Their sides come from {@link Compartments}.
+     */
+    private static final float TANK_FRONT = -0.5f + 1f / 16f;
+    private static final float TANK_BACK = -0.5f + 14.5f / 16f - 0.001f;
+
+    /**
+     * A compartment's content standing in its tank, as high as it is full: a front face and a
+     * surface, in the sprite at its own scale. The colour carries the alpha.
+     */
+    static void drawTank(PoseStack pose, MultiBufferSource buffers, TextureAtlasSprite sprite, int color, int light,
+                         float progress, Compartments compartments, int compartment) {
+        // No culling: the quads are seen from one side only, and a wrong winding would hide them.
+        VertexConsumer buffer = buffers.getBuffer(RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS));
+        PoseStack.Pose last = pose.last();
+
+        float left = localX(compartments.tankLeft(compartment));
+        float right = localX(compartments.tankRight(compartment));
+        float bottom = localY(compartments.tankBottom(compartment));
+        float height = (compartments.tankTop(compartment) - compartments.tankBottom(compartment)) / 16f;
+        float top = bottom + height * Math.max(progress, 1f / 16f);
+        float u0 = sprite.getU0();
+        float u1 = sprite.getU(left - right);
+        float v0 = sprite.getV0();
+        float vFront = sprite.getV(Math.min(1f, top - bottom));
+        float vTop = sprite.getV(13.5f / 16f);
+
+        // Front face, towards -z.
+        vertex(buffer, last, left, bottom, TANK_FRONT, u0, vFront, color, light, 0, 0, -1);
+        vertex(buffer, last, right, bottom, TANK_FRONT, u1, vFront, color, light, 0, 0, -1);
+        vertex(buffer, last, right, top, TANK_FRONT, u1, v0, color, light, 0, 0, -1);
+        vertex(buffer, last, left, top, TANK_FRONT, u0, v0, color, light, 0, 0, -1);
+
+        // Surface, towards +y.
+        vertex(buffer, last, right, top, TANK_FRONT, u0, v0, color, light, 0, 1, 0);
+        vertex(buffer, last, right, top, TANK_BACK, u0, vTop, color, light, 0, 1, 0);
+        vertex(buffer, last, left, top, TANK_BACK, u1, vTop, color, light, 0, 1, 0);
+        vertex(buffer, last, left, top, TANK_FRONT, u1, v0, color, light, 0, 1, 0);
+    }
+
+    private static void vertex(VertexConsumer buffer, PoseStack.Pose pose, float x, float y, float z,
+                               float u, float v, int color, int light, float nx, float ny, float nz) {
+        buffer.addVertex(pose, x, y, z)
+                .setColor(color)
+                .setUv(u, v)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(light)
+                .setNormal(pose, nx, ny, nz);
     }
 }

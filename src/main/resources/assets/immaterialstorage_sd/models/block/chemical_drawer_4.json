@@ -1,0 +1,7 @@
+{
+  "__comment": "The chemical drawer with 4 compartments: the shared drawer body, with Immaterial Drawers' chemical drawer front.",
+  "parent": "immaterialstorage_sd:block/drawer_body_4",
+  "textures": {
+    "front": "immaterialstorage_sd:block/chemical_drawer_front_4"
+  }
+}

@@ -3,8 +3,12 @@
   "block.immaterialstorage_sd.fluid_drawer": "Tiroir à fluide",
   "block.immaterialstorage_sd.fluid_drawer_2": "Tiroir à fluide 1x2",
   "block.immaterialstorage_sd.fluid_drawer_4": "Tiroir à fluide 2x2",
+  "block.immaterialstorage_sd.chemical_drawer": "Tiroir à chimiques",
+  "block.immaterialstorage_sd.chemical_drawer_2": "Tiroir à chimiques 1x2",
+  "block.immaterialstorage_sd.chemical_drawer_4": "Tiroir à chimiques 2x2",
   "tooltip.immaterialstorage_sd.energy": "%s / %s FE",
   "tooltip.immaterialstorage_sd.fluid": "%s : %s / %s mB",
   "tooltip.immaterialstorage_sd.upgrades": "%s amélioration(s) installée(s)",
-  "tooltip.immaterialstorage_sd.empty": "Vide"
+  "tooltip.immaterialstorage_sd.empty": "Vide",
+  "tooltip.immaterialstorage_sd.chemical": "%s : %s / %s mB"
 }

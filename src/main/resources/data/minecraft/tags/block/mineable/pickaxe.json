@@ -1,1 +1,21 @@
-{"replace":false,"values":["immaterialstorage_sd:energy_drawer","immaterialstorage_sd:fluid_drawer","immaterialstorage_sd:fluid_drawer_2","immaterialstorage_sd:fluid_drawer_4"]}
+{
+  "replace": false,
+  "values": [
+    "immaterialstorage_sd:energy_drawer",
+    "immaterialstorage_sd:fluid_drawer",
+    "immaterialstorage_sd:fluid_drawer_2",
+    "immaterialstorage_sd:fluid_drawer_4",
+    {
+      "id": "immaterialstorage_sd:chemical_drawer",
+      "required": false
+    },
+    {
+      "id": "immaterialstorage_sd:chemical_drawer_2",
+      "required": false
+    },
+    {
+      "id": "immaterialstorage_sd:chemical_drawer_4",
+      "required": false
+    }
+  ]
+}

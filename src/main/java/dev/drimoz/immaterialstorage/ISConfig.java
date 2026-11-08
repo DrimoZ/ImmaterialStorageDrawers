@@ -24,6 +24,11 @@ public final class ISConfig {
                     "Storage upgrades multiply it by Storage Drawers' own multipliers; the fluid API stops at 2,147,483,647 mB.")
             .defineInRange("fluidDrawerBaseCapacity", 32_000, 1, Integer.MAX_VALUE);
 
+    private static final ModConfigSpec.LongValue CHEMICAL_BASE = BUILDER
+            .comment("mB a Chemical Drawer holds with no storage upgrade (Mekanism installed).",
+                    "Storage upgrades multiply it by Storage Drawers' own multipliers; compartments share it.")
+            .defineInRange("chemicalDrawerBaseCapacity", 32_000L, 1L, Long.MAX_VALUE);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     private ISConfig() {
@@ -35,5 +40,9 @@ public final class ISConfig {
 
     public static int fluidBaseCapacity() {
         return FLUID_BASE.getAsInt();
+    }
+
+    public static long chemicalBaseCapacity() {
+        return CHEMICAL_BASE.getAsLong();
     }
 }

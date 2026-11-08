@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- Chemical Drawers (with Mekanism installed, optional): 1x1, 1x2 and 2x2, one Mekanism chemical (gas,
+  infuse type, pigment or slurry) per compartment, 32,000 mB base (configurable), Storage Drawers'
+  upgrades included. Tubes and machines reach them on every side; a chemical tank in hand empties
+  into, or fills from, the compartment it is used on; controllers expose every chemical compartment
+  of their network. Gases glow in their tank. Without Mekanism, nothing of this is loaded.
 - Fluid Drawers 1x2 and 2x2: two or four compartments, one fluid each, each holding half or a quarter
   of a 1x1 (as Storage Drawers divides its drawers). A bucket fills or empties the compartment it is
   used on; pipes and controllers fill compartments already holding that fluid first. Their upgrade

@@ -65,6 +65,14 @@ dependencies {
     runtimeOnly "maven.modrinth:jade:${jade_version}"
     compileOnly "maven.modrinth:the-one-probe:${top_version}"
     runtimeOnly "maven.modrinth:the-one-probe:${top_version}"
+
+    // Mekanism is optional: the Chemical Drawers exist only when it is installed. compileOnly, never
+    // bundled; every class that touches its API is reached through Mods.mekanism(). runtimeOnly too,
+    // so the game tests see the chemical drawers; `-PnoMekanism` drops it, to exercise the absent path.
+    compileOnly "maven.modrinth:mekanism:${mekanism_version}"
+    if (!project.hasProperty("noMekanism")) {
+        runtimeOnly "maven.modrinth:mekanism:${mekanism_version}"
+    }
 }
 
 // Expand gradle.properties into neoforge.mods.toml so versions live in one place.

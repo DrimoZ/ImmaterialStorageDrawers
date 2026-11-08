@@ -96,6 +96,11 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity implement
         return tag;
     }
 
+    /** How the front is divided; one compartment unless a drawer says otherwise. */
+    public Compartments compartments() {
+        return Compartments.ONE;
+    }
+
     public DrawerUpgrades upgrades() {
         return upgrades;
     }

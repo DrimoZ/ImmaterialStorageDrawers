@@ -67,6 +67,7 @@ public class FluidDrawerBlockEntity extends DrawerBlockEntity {
         };
     }
 
+    @Override
     public Compartments compartments() {
         return compartments;
     }

@@ -52,6 +52,11 @@ public final class ISClientSetup {
     public static void wrapFramedModels(ModelEvent.ModifyBakingResult event) {
         List<Block> drawers = new java.util.ArrayList<>(List.of(ImmaterialStorage.ENERGY_DRAWER.get()));
         ImmaterialStorage.FLUID_DRAWERS.forEach(drawer -> drawers.add(drawer.get()));
+        wrapFramed(event, drawers);
+    }
+
+    /** Wraps every state model of these drawers so they wear their frame; optional modules call it for theirs. */
+    public static void wrapFramed(ModelEvent.ModifyBakingResult event, List<? extends Block> drawers) {
         for (Block block : drawers) {
             for (BlockState state : block.getStateDefinition().getPossibleStates()) {
                 event.getModels().computeIfPresent(BlockModelShaper.stateToModelLocation(state),
