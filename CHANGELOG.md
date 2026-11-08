@@ -13,16 +13,16 @@
 - Fluid Drawer: holds one fluid, 32,000 mB (32 buckets) base, sized by the same Storage Drawers
   upgrades (void and creative included). Buckets and fluid containers fill and empty it by hand;
   pipes reach it on every side. Crafted from smooth stone, buckets and any Storage Drawers drawer.
-  The fluid stands in the niche as high as the drawer is full, with the amount written below.
+  The fluid stands in the tank as high as the drawer is full, with the amount written below.
 - Storage Drawers controllers and Controller Slaves expose the Fluid Drawers they link as one
   multi-tank handler, filling drawers that already hold a fluid before empty ones.
 - Energy Drawer: stores 500,000 FE, exposed to cables on every side. Crafted from smooth stone,
-  redstone blocks and any Storage Drawers drawer; listed in the Storage Drawers creative tab. Built
-  in Storage Drawers' style (controller stone, 1 px trim rim) around a deep niche where an energy
-  cube turns: its core glows and spins faster as the drawer fills. The amount (stored / capacity)
-  is written under it.
-- Each drawer has its own inventory icon: the energy cube in its niche for the Energy Drawer,
-  water in its niche for the Fluid Drawer.
+  redstone blocks and any Storage Drawers drawer; listed in the Storage Drawers creative tab. Its front
+  is Immaterial Drawers' Energy Drawer, in a casing of Storage Drawers' controller stone: a deep tank where an
+  energy cube turns, its core glowing and spinning faster as the drawer fills. The amount (stored /
+  capacity) is written on the frame under it, lit day and night.
+- Each drawer has its own inventory icon: the energy cube in its tank for the Energy Drawer,
+  water in its tank for the Fluid Drawer.
 - A broken Energy Drawer keeps its energy and upgrades in the dropped item and gets them back when
   placed. An empty one drops a plain item that stacks. Its tooltip shows the energy and the number
   of upgrades it holds.
@@ -30,7 +30,8 @@
   capacity exactly as they do for items (from Storage Drawers' config; seven netherite upgrades
   reach about 7.2 billion FE), plus void, creative storage and creative vending. Right-click to
   install, or sneak + right-click with an empty hand to open the upgrade screen (Storage Drawers'
-  own drawer screen, showing what the drawer holds). An upgrade the contents depend on cannot be
+  own drawer screen: what the drawer holds sits in its slot as an item would, the fluid's texture
+  or the energy cube turning, with the amount beside it). An upgrade the contents depend on cannot be
   taken out. Fluid Drawers take the same upgrades. Which upgrades fit together follows Storage
   Drawers' own rule, read from Storage Drawers itself: a drawer takes creative storage or creative
   vending, not both.

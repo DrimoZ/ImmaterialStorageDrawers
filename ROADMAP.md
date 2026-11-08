@@ -11,8 +11,9 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
   32,000 mB base).
 - **Storage Drawers' own upgrades**: storage tiers, void, creative storage, creative vending, in 7
   slots, through Storage Drawers' own drawer screen.
-- **Look**: Storage Drawers' frame and controller stone around a deep niche, the energy cube or the
-  fluid inside, the amount on the front, a distinct inventory icon each.
+- **Look**: the front of Immaterial Drawers' drawers (its frame, tank and energy front, on Functional
+  Storage's fluid drawer shape) in a casing of Storage Drawers' controller stone, the energy cube or the fluid in the tank, the amount on the frame,
+  a distinct inventory icon each.
 - **Drops keep everything**: a broken drawer keeps its contents and upgrades in the item.
 - **Jade and The One Probe** show the full energy, past the 2.1 billion FE of the standard API.
 - **Framing** at Storage Drawers' framing table, through its own frame data; the frame is drawn by

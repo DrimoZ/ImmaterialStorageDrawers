@@ -39,10 +39,10 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity implement
     public static final ModelProperty<FrameLook> FRAME_LOOK = new ModelProperty<>();
 
     /**
-     * The blocks whose textures a framed drawer wears, trim and front falling back to the side as
+     * The blocks whose textures a framed drawer wears, the trim falling back to the side as
      * in Storage Drawers. Blocks, not stacks, so two looks compare by identity.
      */
-    public record FrameLook(Block side, Block trim, Block front) {
+    public record FrameLook(Block side, Block trim) {
     }
 
     /**
@@ -72,8 +72,7 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity implement
             return null;
         }
         Block trim = blockOf(frame.getMaterial(FrameMaterial.TRIM));
-        Block front = blockOf(frame.getMaterial(FrameMaterial.FRONT));
-        return new FrameLook(side, trim != null ? trim : side, front != null ? front : side);
+        return new FrameLook(side, trim != null ? trim : side);
     }
 
     @Nullable

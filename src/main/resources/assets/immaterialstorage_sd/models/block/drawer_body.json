@@ -1,0 +1,138 @@
+{
+  "__comment": "Shared by every drawer of ours: Functional Storage's fluid drawer (casing side_machine, front frame fluid_front_1, tank fluid_inner_1; MIT, see NOTICE), flattened into one model, its front and tank in Immaterial Drawers' textures, so both mods' drawers are one family, its casing in Storage Drawers' controller stone (referenced, not copied), so it sits among Storage Drawers blocks. The renderers draw the contents in the tank and the amount on the frame's bottom rail. Front is north. Tint indices mark which frame material a face takes when framed at Storage Drawers' framing table (10 side: the casing, 11 trim: the front frame; the tank is never framed): see FramedDrawerModel.",
+  "parent": "block/block",
+  "render_type": "minecraft:cutout_mipped",
+  "textures": {
+    "particle": "storagedrawers:block/drawers_comp_side_2",
+    "side": "storagedrawers:block/drawers_comp_side_2",
+    "top": "storagedrawers:block/drawers_comp_side",
+    "bottom": "storagedrawers:block/drawers_comp_side",
+    "front": "immaterialstorage_sd:block/energy_drawer_front",
+    "inner": "immaterialstorage_sd:block/drawer_inner"
+  },
+  "elements": [
+    {
+      "__comment": "side_machine: left",
+      "from": [15, 1, 0], "to": [16, 15, 15],
+      "faces": {
+        "north": { "uv": [1, 0, 15, 1], "rotation": 90, "texture": "#side", "cullface": "north", "tintindex": 10 },
+        "east":  { "uv": [1, 1, 16, 15], "texture": "#side", "cullface": "east", "tintindex": 10 },
+        "west":  { "uv": [0, 1, 15, 15], "texture": "#side", "cullface": "north", "tintindex": 10 }
+      }
+    },
+    {
+      "__comment": "side_machine: top",
+      "from": [0, 15, 0], "to": [16, 16, 16],
+      "faces": {
+        "north": { "uv": [0, 0, 16, 1], "texture": "#top", "cullface": "north", "tintindex": 10 },
+        "east":  { "uv": [0, 0, 16, 1], "texture": "#top", "cullface": "east", "tintindex": 10 },
+        "south": { "uv": [0, 0, 16, 1], "texture": "#top", "cullface": "south", "tintindex": 10 },
+        "west":  { "uv": [0, 0, 16, 1], "texture": "#top", "cullface": "west", "tintindex": 10 },
+        "up":    { "uv": [0, 0, 16, 16], "texture": "#top", "cullface": "up", "tintindex": 10 },
+        "down":  { "uv": [0, 0, 16, 16], "texture": "#top", "cullface": "north", "tintindex": 10 }
+      }
+    },
+    {
+      "__comment": "side_machine: right",
+      "from": [0, 1, 0], "to": [1, 15, 15],
+      "faces": {
+        "north": { "uv": [1, 0, 15, 1], "rotation": 90, "texture": "#side", "cullface": "north", "tintindex": 10 },
+        "east":  { "uv": [1, 1, 16, 15], "texture": "#side", "cullface": "north", "tintindex": 10 },
+        "west":  { "uv": [0, 1, 15, 15], "texture": "#side", "cullface": "west", "tintindex": 10 }
+      }
+    },
+    {
+      "__comment": "side_machine: bottom",
+      "from": [0, 0, 0], "to": [16, 1, 16],
+      "faces": {
+        "north": { "uv": [0, 0, 16, 1], "texture": "#bottom", "cullface": "north", "tintindex": 10 },
+        "east":  { "uv": [0, 0, 16, 1], "texture": "#bottom", "cullface": "east", "tintindex": 10 },
+        "south": { "uv": [0, 0, 16, 1], "rotation": 180, "texture": "#bottom", "cullface": "south", "tintindex": 10 },
+        "west":  { "uv": [0, 0, 16, 1], "texture": "#bottom", "cullface": "west", "tintindex": 10 },
+        "up":    { "uv": [0, 0, 16, 16], "texture": "#bottom", "cullface": "north", "tintindex": 10 },
+        "down":  { "uv": [0, 0, 16, 16], "texture": "#bottom", "cullface": "down", "tintindex": 10 }
+      }
+    },
+    {
+      "__comment": "side_machine: back",
+      "from": [0, 1, 15], "to": [16, 15, 16],
+      "faces": {
+        "east":  { "uv": [1, 0, 15, 1], "rotation": 90, "texture": "#side", "cullface": "east", "tintindex": 10 },
+        "south": { "uv": [0, 1, 16, 15], "texture": "#side", "cullface": "south", "tintindex": 10 },
+        "west":  { "uv": [1, 15, 15, 16], "rotation": 90, "texture": "#side", "cullface": "west", "tintindex": 10 }
+      }
+    },
+    {
+      "__comment": "fluid_front_1: top",
+      "from": [1, 13, 0.5], "to": [15, 15, 1],
+      "faces": {
+        "north": { "uv": [1, 1, 15, 3], "texture": "#front", "cullface": "north", "tintindex": 11 },
+        "down":  { "uv": [1, 2.5, 15, 2], "texture": "#front", "cullface": "north", "tintindex": 11 }
+      }
+    },
+    {
+      "__comment": "fluid_front_1: bottom",
+      "from": [1, 1, 0.5], "to": [15, 3, 1],
+      "faces": {
+        "north": { "uv": [1, 13, 15, 15], "texture": "#front", "cullface": "north", "tintindex": 11 },
+        "up":    { "uv": [1, 13, 15, 13.5], "texture": "#front", "cullface": "north", "tintindex": 11 }
+      }
+    },
+    {
+      "__comment": "fluid_front_1: right",
+      "from": [1, 3, 0.5], "to": [3, 13, 1],
+      "faces": {
+        "north": { "uv": [13, 3, 15, 13], "texture": "#front", "cullface": "north", "tintindex": 11 },
+        "east":  { "uv": [13, 3, 13.5, 13], "rotation": 180, "texture": "#front", "cullface": "north", "tintindex": 11 }
+      }
+    },
+    {
+      "__comment": "fluid_front_1: left",
+      "from": [13, 3, 0.5], "to": [15, 13, 1],
+      "faces": {
+        "north": { "uv": [1, 3, 3, 13], "texture": "#front", "cullface": "north", "tintindex": 11 },
+        "west":  { "uv": [2, 3, 2.5, 13], "rotation": 180, "texture": "#front", "cullface": "north", "tintindex": 11 }
+      }
+    },
+    {
+      "__comment": "fluid_inner_1: left",
+      "from": [14.5, 1, 1], "to": [14.5, 15, 15],
+      "rotation": {"angle": 0, "axis": "y", "origin": [-8.5, 0, -7]},
+      "faces": {
+        "west": { "uv": [1, 1, 15, 15], "texture": "#inner", "cullface": "north" }
+      }
+    },
+    {
+      "__comment": "fluid_inner_1: top",
+      "from": [1, 14.5, 1], "to": [15, 14.5, 15],
+      "rotation": {"angle": 0, "axis": "y", "origin": [-8, -0.5, -8]},
+      "faces": {
+        "down": { "uv": [1, 1, 15, 15], "texture": "#inner", "cullface": "north" }
+      }
+    },
+    {
+      "__comment": "fluid_inner_1: right",
+      "from": [1.5, 1, 1], "to": [1.5, 15, 15],
+      "rotation": {"angle": 0, "axis": "y", "origin": [-7.5, 0, -8]},
+      "faces": {
+        "east": { "uv": [1, 1, 15, 15], "texture": "#inner", "cullface": "north" }
+      }
+    },
+    {
+      "__comment": "fluid_inner_1: bottom",
+      "from": [1, 1.5, 1], "to": [15, 1.5, 15],
+      "rotation": {"angle": 0, "axis": "y", "origin": [0, 0.5, -7]},
+      "faces": {
+        "up": { "uv": [1, 1, 15, 15], "texture": "#inner", "cullface": "north" }
+      }
+    },
+    {
+      "__comment": "fluid_inner_1: back",
+      "from": [1, 1, 14.5], "to": [15, 15, 14.5],
+      "rotation": {"angle": 0, "axis": "y", "origin": [-8, 0, -8.5]},
+      "faces": {
+        "north": { "uv": [1, 1, 15, 15], "texture": "#inner", "cullface": "north" }
+      }
+    }
+  ]
+}

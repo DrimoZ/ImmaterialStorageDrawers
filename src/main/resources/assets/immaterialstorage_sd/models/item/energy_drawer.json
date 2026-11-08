@@ -1,18 +1,18 @@
 {
-  "__comment": "Inventory icon: the shared niche with the energy cube sitting in it, still, so the item reads as energy at a glance. The placed block draws its cube with EnergyDrawerRenderer instead.",
+  "__comment": "Inventory icon: the drawer with the energy cube sitting in it, still, so the item reads as energy at a glance. The placed block draws its cube with EnergyDrawerRenderer instead.",
   "parent": "block/block",
   "loader": "neoforge:composite",
   "children": {
     "niche": {
-      "parent": "immaterialstorage_sd:block/drawer_niche"
+      "parent": "immaterialstorage_sd:block/energy_drawer"
     },
     "frame": {
       "parent": "immaterialstorage_sd:block/energy_cube_frame",
       "transform": {
         "origin": "center",
-        "translation": [0, 0.0625, -0.1875],
+        "translation": [0, 0, -0.015625],
         "rotation": { "y": 45 },
-        "scale": 0.4
+        "scale": 0.5625
       }
     },
     "core": {
@@ -20,9 +20,9 @@
       "render_type": "minecraft:translucent",
       "transform": {
         "origin": "center",
-        "translation": [0, 0.0625, -0.1875],
+        "translation": [0, 0, -0.015625],
         "rotation": { "y": 45 },
-        "scale": 0.4
+        "scale": 0.5625
       }
     }
   }

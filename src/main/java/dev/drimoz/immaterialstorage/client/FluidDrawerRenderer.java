@@ -17,21 +17,24 @@ import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtension
 import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
- * Draws what a Fluid Drawer holds: the fluid standing in the niche, as high as the drawer is full,
+ * Draws what a Fluid Drawer holds: the fluid standing in the tank, as high as the drawer is full,
  * and the amount below it.
  *
  * <p>A fluid has a surface, so its level is the glance; the exact figure is the text. The fluid
- * glows at its own light level (lava lights the niche, water does not).
+ * glows at its own light level (lava lights the tank, water does not).
  */
 public class FluidDrawerRenderer implements BlockEntityRenderer<FluidDrawerBlockEntity> {
 
-    /** The niche's inside, in the local frame of {@link DrawerRendering#faceFront}: 1 px rim, 10 px deep. */
-    private static final float HALF_WIDTH = 7f / 16f;
-    private static final float BOTTOM = -7f / 16f;
-    private static final float HEIGHT = 14f / 16f;
-    /** The fluid's front face sits a pixel behind the rim, so the text in front stays readable. */
+    /**
+     * The tank's inside, in the local frame of {@link DrawerRendering#faceFront}: Functional Storage's
+     * fluid drawer tank (models/block/drawer_body.json), 1.5 to 14.5 px across and high, from just
+     * behind the front frame to 14.5 px deep.
+     */
+    private static final float HALF_WIDTH = 6.5f / 16f;
+    private static final float BOTTOM = -6.5f / 16f;
+    private static final float HEIGHT = 13f / 16f;
     private static final float FRONT = -0.5f + 1f / 16f;
-    private static final float BACK = -0.5f + 10f / 16f - 0.001f;
+    private static final float BACK = -0.5f + 14.5f / 16f - 0.001f;
 
     private final Font font;
 
@@ -54,7 +57,7 @@ public class FluidDrawerRenderer implements BlockEntityRenderer<FluidDrawerBlock
         if (!fluid.isEmpty() && capacity > 0) {
             renderFluid(pose, buffers, fluid, Math.min(1f, fluid.getAmount() / (float) capacity), light);
         }
-        DrawerRendering.drawAmount(font, pose, buffers, light,
+        DrawerRendering.drawAmount(font, pose, buffers,
                 StorageDrawersContract.formatCount(fluid.getAmount()) + " / " + StorageDrawersContract.formatCount(capacity) + " mB");
         pose.popPose();
     }
@@ -74,10 +77,10 @@ public class FluidDrawerRenderer implements BlockEntityRenderer<FluidDrawerBlock
 
         float top = BOTTOM + HEIGHT * Math.max(progress, 1f / 16f);
         float u0 = sprite.getU0();
-        float u1 = sprite.getU(14f / 16f);
+        float u1 = sprite.getU(13f / 16f);
         float v0 = sprite.getV0();
         float vFront = sprite.getV(Math.min(1f, (top - BOTTOM)));
-        float vTop = sprite.getV(9f / 16f);
+        float vTop = sprite.getV(13.5f / 16f);
 
         // Front face, towards -z.
         vertex(buffer, last, HALF_WIDTH, BOTTOM, FRONT, u0, vFront, color, light, 0, 0, -1);

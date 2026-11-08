@@ -24,7 +24,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
- * Draws what an Energy Drawer holds: the energy cube turning in the niche, and the amount below it.
+ * Draws what an Energy Drawer holds: the energy cube turning in the tank, and the amount on the frame below it.
  *
  * <p>The cube and its motion come from Immaterial Drawers, so both mods read the same: a frame that
  * turns at a steady pace, and a translucent, full-bright core that is absent when empty and spins
@@ -41,14 +41,15 @@ public class EnergyDrawerRenderer implements BlockEntityRenderer<EnergyDrawerBlo
             ResourceLocation.fromNamespaceAndPath(ImmaterialStorage.MOD_ID, "block/energy_cube_core"));
 
     /**
-     * The niche is 14 px wide and 10 px deep (models/block/drawer_niche.json). The cube turns on
-     * its vertical axis, so its diagonal must fit the depth: 6.5 x sqrt(2) = 9.2 px.
+     * Immaterial Drawers' size, in the same tank (models/block/drawer_body.json): nine pixels across.
+     * The frame turns on its vertical axis, so what has to fit is its diagonal: 9 x sqrt(2) = 12.7 px,
+     * inside the 13 px between the tank's side walls.
      */
-    private static final float CUBE_SCALE = 6.5f / 16f;
-    /** Middle of the niche, measured from the front face. */
-    private static final float NICHE_CENTRE_DEPTH = 5f / 16f;
-    /** The cube sits a little high, leaving room for the amount under it. */
-    private static final float CUBE_Y = 1f / 16f;
+    private static final float CUBE_SCALE = 9f / 16f;
+    /** Middle of the tank, which runs from 1 px to 14.5 px deep. */
+    private static final float NICHE_CENTRE_DEPTH = 7.75f / 16f;
+    /** The tank is centred on the block. */
+    private static final float CUBE_Y = 0f;
 
     private static final float FRAME_SPEED = 1.2f;
     private static final float CORE_SPEED_EMPTY = 2f;
@@ -64,7 +65,7 @@ public class EnergyDrawerRenderer implements BlockEntityRenderer<EnergyDrawerBlo
             Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.UP, Direction.DOWN, null
     };
 
-    private final RandomSource random = RandomSource.create();
+    private static final RandomSource RANDOM = RandomSource.create();
     private final Font font;
 
     public EnergyDrawerRenderer(Font font) {
@@ -87,7 +88,7 @@ public class EnergyDrawerRenderer implements BlockEntityRenderer<EnergyDrawerBlo
         DrawerRendering.faceFront(pose, drawer);
         renderCube(drawer, partialTicks, pose, buffers, light, combinedOverlay, progress);
         // stored / capacity: the capacity moves with the upgrades, so stored alone says little.
-        DrawerRendering.drawAmount(font, pose, buffers, light,
+        DrawerRendering.drawAmount(font, pose, buffers,
                 StorageDrawersContract.formatCount(stored) + " / " + StorageDrawersContract.formatCount(capacity) + " FE");
 
         pose.popPose();
@@ -95,13 +96,22 @@ public class EnergyDrawerRenderer implements BlockEntityRenderer<EnergyDrawerBlo
 
     private void renderCube(EnergyDrawerBlockEntity drawer, float partialTicks, PoseStack pose, MultiBufferSource buffers,
                             int light, int overlay, float progress) {
-        var models = Minecraft.getInstance().getModelManager();
         float time = drawer.getLevel().getGameTime() % 72000L + partialTicks;
         float phase = Math.floorMod(drawer.getBlockPos().asLong() * 31L, 360L);
 
         pose.pushPose();
         pose.translate(0, CUBE_Y + Mth.sin(time * BOB_SPEED + phase) * BOB_HEIGHT, -0.5f + NICHE_CENTRE_DEPTH);
+        drawCube(pose, buffers, time, phase, progress, light, overlay);
+        pose.popPose();
+    }
 
+    /**
+     * The cube, centred on the pose, at its drawer size: the frame turning, the core spinning and
+     * glowing with the charge. Also what the upgrade screen shows, so the two never differ.
+     */
+    static void drawCube(PoseStack pose, MultiBufferSource buffers, float time, float phase, float progress,
+                         int light, int overlay) {
+        var models = Minecraft.getInstance().getModelManager();
         pose.pushPose();
         pose.mulPose(Axis.YP.rotationDegrees(time * FRAME_SPEED + phase));
         centreModel(pose);
@@ -117,8 +127,6 @@ public class EnergyDrawerRenderer implements BlockEntityRenderer<EnergyDrawerBlo
                     Mth.lerp(progress, CORE_ALPHA_EMPTY, 1f), LightTexture.FULL_BRIGHT, overlay);
             pose.popPose();
         }
-
-        pose.popPose();
     }
 
     /** Models are authored in a 0..16 block; this puts their centre on the pivot, at cube size. */
@@ -128,11 +136,11 @@ public class EnergyDrawerRenderer implements BlockEntityRenderer<EnergyDrawerBlo
     }
 
     /** Every quad of a baked model, culled faces included: there is no neighbour to cull against. */
-    private void renderModel(BakedModel model, PoseStack pose, VertexConsumer buffer, float alpha, int light, int overlay) {
+    private static void renderModel(BakedModel model, PoseStack pose, VertexConsumer buffer, float alpha, int light, int overlay) {
         PoseStack.Pose last = pose.last();
         for (Direction side : SIDES) {
-            random.setSeed(42L);
-            for (BakedQuad quad : model.getQuads(null, side, random, ModelData.EMPTY, null)) {
+            RANDOM.setSeed(42L);
+            for (BakedQuad quad : model.getQuads(null, side, RANDOM, ModelData.EMPTY, null)) {
                 buffer.putBulkData(last, quad, 1f, 1f, 1f, alpha, light, overlay, false);
             }
         }

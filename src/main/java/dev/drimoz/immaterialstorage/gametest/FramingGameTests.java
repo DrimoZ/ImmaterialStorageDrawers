@@ -78,7 +78,7 @@ public final class FramingGameTests {
         ImmaterialStorage.ENERGY_DRAWER.get().setPlacedBy(helper.getLevel(), abs, helper.getLevel().getBlockState(abs), null, framedWithOak());
         EnergyDrawerBlockEntity drawer = energyDrawerAt(helper, DRAWER);
         helper.assertValueEqual(drawer.frameLook(),
-                new DrawerBlockEntity.FrameLook(Blocks.OAK_PLANKS, Blocks.OAK_PLANKS, Blocks.OAK_PLANKS), "frame after placing");
+                new DrawerBlockEntity.FrameLook(Blocks.OAK_PLANKS, Blocks.OAK_PLANKS), "frame after placing");
 
         CompoundTag saved = drawer.saveCustomOnly(helper.getLevel().registryAccess());
         EnergyDrawerBlockEntity reloaded = new EnergyDrawerBlockEntity(abs, drawer.getBlockState());

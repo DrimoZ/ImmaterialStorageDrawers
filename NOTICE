@@ -11,6 +11,7 @@ Licensed under the MIT License.
 (client/FramedDrawerModel.java adapts the UV remapping of its SpriteReplacementModel.)
 
 Functional Storage (storage/BigEnergyStorage.java is adapted from its fluid/BigFluidHandler, by way
-of Immaterial Drawers)
+of Immaterial Drawers; models/block/drawer_body.json is built from its side_machine, fluid_front_1
+and fluid_inner_1 models; textures/block/fluid_drawer_front.png is its fluid_front texture)
 Copyright (c) 2021 Buuz135, Rid
 Licensed under the MIT License.

@@ -24,10 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A drawer's block model in its frame: the same niche model, each frame face retextured with the
+ * A drawer's block model in its frame: the same drawer model, each frame face retextured with the
  * block chosen at Storage Drawers' framing table. Unframed, it is the plain model.
  *
- * <p>Which face takes which material is marked in {@code drawer_niche.json} by a tint index (see the
+ * <p>Which face takes which material is marked in {@code drawer_body.json} by a tint index (see the
  * constants), so the geometry stays in one JSON and no Storage Drawers model code is involved. The
  * texture is the material block's particle texture, as in Storage Drawers.
  *
@@ -35,10 +35,9 @@ import java.util.List;
  */
 public class FramedDrawerModel extends BakedModelWrapper<BakedModel> {
 
-    /** Tint indices of drawer_niche.json; no colour handler is registered for them, so unframed they draw untinted. */
+    /** Tint indices of drawer_body.json; no colour handler is registered for them, so unframed they draw untinted. */
     private static final int SIDE_FACE = 10;
     private static final int TRIM_FACE = 11;
-    private static final int FRONT_FACE = 12;
 
     public FramedDrawerModel(BakedModel plain) {
         super(plain);
@@ -57,7 +56,6 @@ public class FramedDrawerModel extends BakedModelWrapper<BakedModel> {
             Block material = switch (quad.getTintIndex()) {
                 case SIDE_FACE -> look.side();
                 case TRIM_FACE -> look.trim();
-                case FRONT_FACE -> look.front();
                 default -> null;
             };
             framed.add(material == null ? quad : retexture(quad, sprite(material)));

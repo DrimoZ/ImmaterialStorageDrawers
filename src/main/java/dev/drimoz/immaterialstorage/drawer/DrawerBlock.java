@@ -57,7 +57,7 @@ import java.util.List;
  * data component, applied back on placement), so breaking one never destroys anything. An empty
  * drawer drops a plain, stackable item.
  *
- * <p>Storage Drawers' framing table frames it like one of its own drawers (side, trim, front). The
+ * <p>Storage Drawers' framing table frames it like one of its own drawers, side and trim (no front: the window stays dark). The
  * frame is the same block in another look, not a separate framed block: it lives in Storage Drawers'
  * own frame component on the item, so their table also takes it off, and contents and upgrades
  * stay through both.
@@ -164,7 +164,8 @@ public abstract class DrawerBlock extends NetworkNodeBlock implements IFramedSou
 
     @Override
     public boolean supportsFrameMaterial(FrameMaterial material) {
-        return true;
+        // No front: the window stays dark whatever the frame, so a front material would change nothing.
+        return material != FrameMaterial.FRONT;
     }
 
     @Override

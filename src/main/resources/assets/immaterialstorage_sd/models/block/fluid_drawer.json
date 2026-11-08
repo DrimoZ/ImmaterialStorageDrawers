@@ -1,0 +1,7 @@
+{
+  "__comment": "The fluid drawer: the shared drawer body with Functional Storage's fluid drawer front (MIT, see NOTICE).",
+  "parent": "immaterialstorage_sd:block/drawer_body",
+  "textures": {
+    "front": "immaterialstorage_sd:block/fluid_drawer_front"
+  }
+}

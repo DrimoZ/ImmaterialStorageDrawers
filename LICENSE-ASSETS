@@ -3,7 +3,8 @@ Immaterial Storage - asset licence
 
 All Rights Reserved.
 
-This covers every asset in this repository: textures, models, sounds and the mod logo.
+This covers every asset in this repository (textures, models, sounds and the mod logo), except
+those adapted from Functional Storage, which stay under its MIT License: see NOTICE.
 They may not be redistributed, modified or reused outside this mod without written permission.
 
 The code is separate and is MIT licensed - see LICENSE.
