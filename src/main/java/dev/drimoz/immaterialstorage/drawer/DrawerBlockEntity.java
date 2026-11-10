@@ -67,6 +67,12 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity implement
 
     @Nullable
     public FrameLook frameLook() {
+        return lookOf(frame);
+    }
+
+    /** The look of any frame, a placed drawer's or one read from an item; null when unframed. */
+    @Nullable
+    public static FrameLook lookOf(IFramedMaterials frame) {
         Block side = blockOf(frame.getMaterial(FrameMaterial.SIDE));
         if (side == null) {
             return null;

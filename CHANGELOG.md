@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- A framed drawer's inventory icon wears its frame, as the placed block does.
 - Probes: Jade and The One Probe show a bar per chemical compartment and the Source of Source
   Drawers, on drawers and on controllers (their whole network). On these blocks Jade's chemical bars
   are ours, not Mekanism's, whose text was lost on pale chemicals.
@@ -23,8 +24,7 @@
   and the exact amount when a slot is hovered.
 - Framing: Storage Drawers' framing table frames Energy and Fluid Drawers like its own drawers
   (side, trim and front materials) and takes the frame off again. A framed drawer keeps its
-  contents and upgrades through framing, breaking and placing. The inventory icon of a framed
-  drawer stays the plain one.
+  contents and upgrades through framing, breaking and placing.
 - Configuration (`immaterialstorage_sd-common.toml`): the base capacity of each drawer, before
   storage upgrades. The upgrade multipliers stay in Storage Drawers' own config. Lowering a base
   never deletes anything: a drawer already holding more keeps it all and only refuses more.

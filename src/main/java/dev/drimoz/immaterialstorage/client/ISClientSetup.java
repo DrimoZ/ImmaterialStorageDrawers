@@ -2,6 +2,8 @@ package dev.drimoz.immaterialstorage.client;
 
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import net.minecraft.client.renderer.block.BlockModelShaper;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
@@ -55,9 +57,14 @@ public final class ISClientSetup {
         wrapFramed(event, drawers);
     }
 
-    /** Wraps every state model of these drawers so they wear their frame; optional modules call it for theirs. */
+    /**
+     * Wraps every state model of these drawers, and their inventory icons, so they wear their frame;
+     * optional modules call it for theirs.
+     */
     public static void wrapFramed(ModelEvent.ModifyBakingResult event, List<? extends Block> drawers) {
         for (Block block : drawers) {
+            event.getModels().computeIfPresent(ModelResourceLocation.inventory(BuiltInRegistries.ITEM.getKey(block.asItem())),
+                    (location, plain) -> new FramedDrawerModel.ForItem(plain));
             for (BlockState state : block.getStateDefinition().getPossibleStates()) {
                 event.getModels().computeIfPresent(BlockModelShaper.stateToModelLocation(state),
                         (location, plain) -> new FramedDrawerModel(plain));
