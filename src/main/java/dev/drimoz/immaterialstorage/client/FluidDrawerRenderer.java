@@ -27,7 +27,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 public class FluidDrawerRenderer implements BlockEntityRenderer<FluidDrawerBlockEntity> {
 
     /** A locked, empty compartment's pin: seen, but plainly not there. */
-    static final int GHOST_ALPHA = 0x4D;
+    static final int GHOST_ALPHA = 0x8C;
 
     private final Font font;
 
