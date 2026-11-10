@@ -85,6 +85,11 @@ public class SourceDrawerBlockEntity extends DrawerBlockEntity {
     }
 
     @Override
+    protected float fillRatio(int compartment) {
+        return ratio(source.getStoredRaw(), source.getCapacityRaw());
+    }
+
+    @Override
     protected void saveContent(CompoundTag tag, HolderLookup.Provider registries) {
         tag.put(SOURCE_TAG, source.serializeNBT(registries));
     }

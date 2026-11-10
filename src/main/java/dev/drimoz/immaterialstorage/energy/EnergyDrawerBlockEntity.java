@@ -76,6 +76,11 @@ public class EnergyDrawerBlockEntity extends DrawerBlockEntity {
     }
 
     @Override
+    protected float fillRatio(int compartment) {
+        return ratio(energy.getStoredLong(), energy.getCapacityLong());
+    }
+
+    @Override
     protected void saveContent(CompoundTag tag, HolderLookup.Provider registries) {
         tag.put(ENERGY_TAG, energy.serializeNBT(registries));
     }

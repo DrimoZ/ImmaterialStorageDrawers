@@ -87,6 +87,7 @@ public class EnergyDrawerRenderer implements BlockEntityRenderer<EnergyDrawerBlo
 
         pose.pushPose();
         DrawerRendering.faceFront(pose, drawer);
+        DrawerRendering.drawIndicators(pose, buffers, drawer);
         if (!drawer.attributes().isConcealed()) {
             renderCube(drawer, partialTicks, pose, buffers, light, combinedOverlay, progress);
         }

@@ -24,6 +24,8 @@ import com.jaquadro.minecraft.storagedrawers.item.ItemUpgrade;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeCreative;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeStorage;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeVoid;
+import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeIllumination;
+import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeRedstone;
 import com.jaquadro.minecraft.storagedrawers.util.CountFormatter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -136,6 +138,31 @@ public final class StorageDrawersContract {
     public static boolean isCreativeVendingUpgrade(ItemStack stack) {
         return stack.getItem() instanceof ItemUpgradeCreative upgrade && upgrade.isEnabled()
                 && upgrade.type == EnumUpgradeCreative.VENDING;
+    }
+
+    /**
+     * The redstone upgrade's kind, by Storage Drawers' own name ("combined", "max", "min"), or null
+     * for anything else or a kind disabled in their config.
+     */
+    @Nullable
+    public static String redstoneType(ItemStack stack) {
+        return stack.getItem() instanceof ItemUpgradeRedstone upgrade && upgrade.isEnabled()
+                ? upgrade.type.getSerializedName() : null;
+    }
+
+    /** Storage Drawers' "analogOutput" setting: a comparator reads the level; otherwise the drawer emits it. */
+    public static boolean analogRedstone() {
+        return ModCommonConfig.INSTANCE.UPGRADES.redstoneUpgrade.analogOutput.get();
+    }
+
+    public static boolean isIlluminationUpgrade(ItemStack stack) {
+        return stack.getItem() instanceof ItemUpgradeIllumination upgrade && upgrade.isEnabled();
+    }
+
+    /** The light level, 0 to 15, Storage Drawers draws its labels at least at, with or without the upgrade. */
+    public static int minimumLabelLight(boolean illuminated) {
+        var config = ModCommonConfig.INSTANCE.UPGRADES.illuminationUpgrade;
+        return illuminated ? config.illuminationLevel.get() : config.minIlluminationLevel.get();
     }
 
     /**

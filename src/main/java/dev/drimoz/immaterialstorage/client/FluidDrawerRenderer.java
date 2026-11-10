@@ -46,9 +46,7 @@ public class FluidDrawerRenderer implements BlockEntityRenderer<FluidDrawerBlock
 
         pose.pushPose();
         DrawerRendering.faceFront(pose, drawer);
-        if (drawer.attributes().isLocked()) {
-            DrawerRendering.drawLock(pose, buffers);
-        }
+        DrawerRendering.drawIndicators(pose, buffers, drawer);
         for (int i = 0; i < compartments.count(); i++) {
             FluidStack fluid = drawer.tanks().get(i).getFluid();
             int capacity = drawer.tanks().get(i).getCapacity();

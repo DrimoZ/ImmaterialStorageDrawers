@@ -44,9 +44,7 @@ public class ChemicalDrawerRenderer implements BlockEntityRenderer<ChemicalDrawe
 
         pose.pushPose();
         DrawerRendering.faceFront(pose, drawer);
-        if (drawer.attributes().isLocked()) {
-            DrawerRendering.drawLock(pose, buffers);
-        }
+        DrawerRendering.drawIndicators(pose, buffers, drawer);
         for (int i = 0; i < compartments.count(); i++) {
             ChemicalStack chemical = drawer.tanks().get(i).getChemical();
             long capacity = drawer.tanks().get(i).getCapacity();

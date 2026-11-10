@@ -72,8 +72,10 @@ compartments already holding a fluid or chemical first. Jade and The One Probe s
 
 ![Upgrades and framing](https://raw.githubusercontent.com/DrimoZ/ImmaterialStorageDrawers/main/docs/store-art/header_upgrades.jpg)
 
-- **Storage Drawers' upgrades**, 7 slots: storage, void, creative storage, creative vending. Sneak and
-  right-click with an empty hand for the upgrade screen you already know.
+- **Storage Drawers' upgrades**, 7 slots: storage, void, creative storage, creative vending, redstone
+  and illumination. Sneak and right-click with an empty hand for the upgrade screen you already know.
+- **Storage Drawers' keys** too: lock, quantify, shroud, priority, suspend and the Personal Key, each
+  with its usual icon on the front.
 - **The Framing Table** frames every drawer, and the frame shows in your inventory too.
 - **Break a drawer and keep everything**: contents, upgrades and frame stay in the item.
 

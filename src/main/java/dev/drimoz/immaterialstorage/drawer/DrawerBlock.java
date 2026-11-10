@@ -98,6 +98,39 @@ public abstract class DrawerBlock extends NetworkNodeBlock implements IFramedSou
         return rotate(state, mirror.getRotation(state.getValue(FACING)));
     }
 
+    // Storage Drawers' redstone upgrades, wired as on their drawers (BlockDrawers): an analog signal
+    // for comparators by default, or, with their "analogOutput" off, a signal the drawer emits
+    // around it and strongly into the block above.
+
+    @Override
+    protected boolean isSignalSource(BlockState state) {
+        return !StorageDrawersContract.analogRedstone();
+    }
+
+    @Override
+    protected int getSignal(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos, Direction side) {
+        return isSignalSource(state) ? redstoneLevel(level, pos) : 0;
+    }
+
+    @Override
+    protected int getDirectSignal(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos, Direction side) {
+        return side == Direction.UP ? getSignal(state, level, pos, side) : 0;
+    }
+
+    @Override
+    protected boolean hasAnalogOutputSignal(BlockState state) {
+        return true;
+    }
+
+    @Override
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+        return redstoneLevel(level, pos);
+    }
+
+    private static int redstoneLevel(net.minecraft.world.level.BlockGetter level, BlockPos pos) {
+        return level.getBlockEntity(pos) instanceof DrawerBlockEntity drawer ? drawer.redstoneLevel() : 0;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {

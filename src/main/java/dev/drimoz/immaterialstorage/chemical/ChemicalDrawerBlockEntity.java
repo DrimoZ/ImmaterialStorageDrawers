@@ -122,6 +122,11 @@ public class ChemicalDrawerBlockEntity extends DrawerBlockEntity {
     }
 
     @Override
+    protected float fillRatio(int compartment) {
+        return ratio(tanks.get(compartment).getAmount(), tanks.get(compartment).getCapacity());
+    }
+
+    @Override
     protected void saveContent(CompoundTag tag, HolderLookup.Provider registries) {
         ListTag list = new ListTag();
         for (DrawerChemicalTank tank : tanks) {

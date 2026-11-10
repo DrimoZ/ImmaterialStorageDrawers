@@ -39,6 +39,7 @@ public class SourceDrawerRenderer implements BlockEntityRenderer<SourceDrawerBlo
 
         pose.pushPose();
         DrawerRendering.faceFront(pose, drawer);
+        DrawerRendering.drawIndicators(pose, buffers, drawer);
         if (stored > 0 && capacity > 0 && !drawer.attributes().isConcealed()) {
             var sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(SourceClient.SOURCE_TEXTURE);
             DrawerRendering.drawTank(pose, buffers, sprite, SOURCE_COLOR, LightTexture.FULL_BRIGHT,

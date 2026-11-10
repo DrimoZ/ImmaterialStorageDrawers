@@ -3,6 +3,13 @@
 ## Unreleased
 
 ### Added
+- Storage Drawers' redstone upgrades (combined, max, min) on every drawer: a comparator reads how
+  full it is, compartments counted as Storage Drawers counts its drawers, and its "analogOutput"
+  setting is followed. The illumination upgrade lights the contents, at the level set in Storage
+  Drawers' config.
+- Storage Drawers' indicator icons on the front: claim (Personal Key), lock and claim together,
+  void, priority, shroud and suspend, in Storage Drawers' places and order.
+
 - Storage Drawers' keys work on every drawer: the Drawer Key locks fluid and chemical compartments to
   what they hold (a padlock on the front; an emptied compartment keeps it, shown as a ghost); Quantify and Shroud hide the
   amount or the contents; the Priority Key orders how controllers fill drawers and the Suspend Key

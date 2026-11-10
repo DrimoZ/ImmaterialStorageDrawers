@@ -53,10 +53,16 @@ final class DrawerRendering {
         return (fromBottom - 8) / 16f;
     }
 
-    /** The block is opaque, so its own light is 0: the tank is lit as the block in front is. */
+    /**
+     * The block is opaque, so its own light is 0: the tank is lit as the block in front is, raised
+     * to Storage Drawers' minimum label light, which its illumination upgrade raises further (their
+     * config, read as their renderer reads it).
+     */
     static int frontLight(DrawerBlockEntity drawer) {
         Direction facing = drawer.getBlockState().getValue(DrawerBlock.FACING);
-        return LevelRenderer.getLightColor(drawer.getLevel(), drawer.getBlockPos().relative(facing));
+        int light = LevelRenderer.getLightColor(drawer.getLevel(), drawer.getBlockPos().relative(facing));
+        int minimum = dev.drimoz.immaterialstorage.StorageDrawersContract.minimumLabelLight(drawer.upgrades().hasIllumination()) * 16;
+        return (light & 0xFFFF0000) | Math.max(light & 0xFFFF, minimum);
     }
 
     /** Writes a compartment's amount, shrunk when it would run too wide; full bright, as Functional Storage does. */
@@ -125,19 +131,53 @@ final class DrawerRendering {
                 .setNormal(pose, nx, ny, nz);
     }
 
-    private static final net.minecraft.resources.ResourceLocation LOCK =
-            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("storagedrawers", "block/indicator/lock_icon");
+    private static net.minecraft.resources.ResourceLocation indicator(String name) {
+        return net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("storagedrawers", "block/indicator/" + name);
+    }
+
+    /** The first icon from the right, on the top rail: Storage Drawers starts in its corner, we start inside our frame. */
+    private static final float ICONS_FROM_LEFT = 13.5f;
 
     /**
-     * The padlock of a drawer locked with Storage Drawers' Drawer Key: Storage Drawers' own icon
-     * (referenced, not copied) at its own size, 1 px, centred on the front frame's top rail, lit like
-     * the amounts.
+     * Storage Drawers' own indicators (its textures, referenced, not copied), chosen as its
+     * {@code DrawerModelDecorator} chooses them: centred on the top rail, the padlock (Drawer Key),
+     * the claim (Personal Key) or both in one icon; from the right, void, priority, Shroud and
+     * suspend, in Storage Drawers' order. 1 px each, as theirs are, lit like the amounts.
      */
-    static void drawLock(PoseStack pose, MultiBufferSource buffers) {
-        TextureAtlasSprite sprite = net.minecraft.client.Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(LOCK);
+    static void drawIndicators(PoseStack pose, MultiBufferSource buffers, DrawerBlockEntity drawer) {
+        var attr = drawer.attributes();
+        boolean locked = attr.isLocked();
+        boolean claimed = drawer.getOwner() != null;
+        if (locked || claimed) {
+            drawIcon(pose, buffers, indicator(locked && claimed ? "lock_claim_icon" : locked ? "lock_icon" : "claim_icon"), 7.5f);
+        }
+        float fromLeft = ICONS_FROM_LEFT;
+        if (drawer.upgrades().hasVoid()) {
+            drawIcon(pose, buffers, indicator("void_icon"), fromLeft--);
+        }
+        String priority = switch (attr.getPriority()) {
+            case -2 -> "priority_n2_icon";
+            case -1 -> "priority_n1_icon";
+            case 1 -> "priority_p1_icon";
+            case 2 -> "priority_p2_icon";
+            default -> null;
+        };
+        if (priority != null) {
+            drawIcon(pose, buffers, indicator(priority), fromLeft--);
+        }
+        if (attr.isConcealed()) {
+            drawIcon(pose, buffers, indicator("shroud_icon"), fromLeft--);
+        }
+        if (attr.isSuspended()) {
+            drawIcon(pose, buffers, indicator("suspend_icon"), fromLeft);
+        }
+    }
+
+    private static void drawIcon(PoseStack pose, MultiBufferSource buffers, net.minecraft.resources.ResourceLocation texture, float fromLeft) {
+        TextureAtlasSprite sprite = net.minecraft.client.Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
         VertexConsumer buffer = buffers.getBuffer(RenderType.entityCutoutNoCull(InventoryMenu.BLOCK_ATLAS));
         PoseStack.Pose last = pose.last();
-        float left = localX(7.5f), right = localX(8.5f), bottom = localY(13.5f), top = localY(14.5f);
+        float left = localX(fromLeft), right = localX(fromLeft + 1), bottom = localY(13.5f), top = localY(14.5f);
         int light = LightTexture.FULL_BRIGHT;
         vertex(buffer, last, left, bottom, FRAME_Z, sprite.getU0(), sprite.getV1(), 0xFFFFFFFF, light, 0, 0, -1);
         vertex(buffer, last, right, bottom, FRAME_Z, sprite.getU1(), sprite.getV1(), 0xFFFFFFFF, light, 0, 0, -1);

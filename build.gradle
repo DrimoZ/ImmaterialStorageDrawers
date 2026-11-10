@@ -24,6 +24,13 @@ neoForge {
             gameDirectory = project.file('run')
             systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
         }
+        // A real dedicated server, for checking the mod outside a single-player world (client
+        // classes kept off the server, real network sync). Connect a client run to localhost.
+        server {
+            server()
+            gameDirectory = project.file('run-server')
+            programArgument '--nogui'
+        }
         // Runs every @GameTest headlessly and exits non-zero if any fails. The spike's acceptance
         // criterion (SPIKE.md), kept afterwards as a regression check against new
         // Storage Drawers releases.

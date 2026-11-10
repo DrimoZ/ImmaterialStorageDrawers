@@ -22,7 +22,11 @@ Storage).
 | Source Drawer | 1x1 | 32,000 Source | Ars Nouveau |
 
 - **Storage Drawers' own upgrades**, 7 slots: the storage upgrades multiply the capacity exactly as
-  they do for items (from Storage Drawers' config), plus void, creative storage and creative vending.
+  they do for items (from Storage Drawers' config), plus void, creative storage, creative vending,
+  redstone (a comparator reads how full the drawer is) and illumination.
+- **Storage Drawers' keys**: the Drawer Key locks a compartment to its fluid or chemical, Quantify
+  and Shroud hide the amount or the contents, Priority and Suspend steer controllers, the Personal
+  Key keeps other players out. Each shows Storage Drawers' own icon on the front.
   Energy is counted in 64 bits: seven Netherite upgrades hold about 7.2 billion FE.
 - **Controllers and Controller Slaves** expose the energy, fluids, chemicals and Source of every
   drawer they link, as one store, to cables, pipes, tubes and relays.

@@ -194,6 +194,62 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity implement
         syncPending = true;
     }
 
+    /** How full a compartment is, 0 to 1 (0 without capacity), for Storage Drawers' redstone upgrades. */
+    protected abstract float fillRatio(int compartment);
+
+    protected static float ratio(double stored, double capacity) {
+        return capacity > 0 ? (float) Math.min(1d, stored / capacity) : 0f;
+    }
+
+    public boolean isRedstone() {
+        return upgrades.redstoneType() != null;
+    }
+
+    /**
+     * The signal of a drawer with a redstone upgrade, by Storage Drawers' own rules
+     * ({@code BlockEntityDrawers.getRedstoneLevel}), compartments standing for their drawers:
+     * combined is the average fill, max the fullest, min the emptiest; 15 only when full, otherwise
+     * at most 14.
+     */
+    public int redstoneLevel() {
+        String type = upgrades.redstoneType();
+        if (type == null) {
+            return 0;
+        }
+        int count = compartments().count();
+        float sum = 0;
+        float max = 0;
+        float min = 1;
+        for (int i = 0; i < count; i++) {
+            float ratio = fillRatio(i);
+            sum += ratio;
+            max = Math.max(max, ratio);
+            min = Math.min(min, ratio);
+        }
+        float level = switch (type) {
+            case "max" -> max;
+            case "min" -> min;
+            default -> sum / count;
+        };
+        return level >= 1 ? 15 : (int) Math.ceil(level * 14);
+    }
+
+    /** As Storage Drawers does: a drawer emitting a signal tells the blocks around it and the one below. */
+    private void updateRedstoneNeighbours() {
+        if (level != null && !level.isClientSide) {
+            level.updateNeighborsAt(worldPosition, getBlockState().getBlock());
+            level.updateNeighborsAt(worldPosition.below(), getBlockState().getBlock());
+        }
+    }
+
+    @Override
+    public void setChanged() {
+        if (isRedstone()) {
+            updateRedstoneNeighbours();
+        }
+        super.setChanged();
+    }
+
     /** Nothing worth keeping in the dropped item. */
     public boolean isEmpty() {
         return isContentEmpty() && upgrades.installed().isEmpty() && attributes.isDefault() && owner == null;
@@ -240,6 +296,8 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity implement
         }
         upgrades.set(slot, stack);
         applyUpgrades();
+        // Also when a redstone upgrade just came out: the signal it gave must go.
+        updateRedstoneNeighbours();
         setChanged();
         syncNow();
     }

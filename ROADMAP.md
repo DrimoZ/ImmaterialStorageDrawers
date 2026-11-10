@@ -17,6 +17,7 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
 - **Drops keep everything**: a broken drawer keeps its contents and upgrades in the item.
 - **Jade and The One Probe** show the full energy, past the 2.1 billion FE of the standard API.
 - **Storage Drawers' keys** on every drawer: lock, quantify, shroud, priority, suspend, personal.
+  Their indicator icons show on the front; the redstone and illumination upgrades work too.
 - **Probes** for every content: Jade and The One Probe show energy, fluids, chemicals and Source, on
   drawers and controllers.
 - **Source Drawer** (Ars Nouveau, optional), found by relays, the apparatus and sourcelinks, exposed
@@ -31,11 +32,15 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
   the Jade and The One Probe readings, by day and by night.
 - **Configuration** of the base capacities; the upgrade multipliers come from Storage Drawers' own
   config.
+- **Multiplayer**: checked on a dedicated server with a client connected over the network
+  (buckets, upgrades by hand, the Personal Key, the upgrade screen opening). Run it with `runServer`.
 
 ## Next
 
 1. **Store images**: the README and the store text (`STORE.md`) are written; the banner, the
    section headers and the captures without HUD, in Immaterial Drawers' style, are still to make.
+2. **Release check**: the built jar in a normal launcher instance, with and without Mekanism and
+   Ars Nouveau; then the version number and a dated changelog section.
 
 ## Considered, not planned
 

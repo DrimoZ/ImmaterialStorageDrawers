@@ -16,7 +16,8 @@ import java.util.List;
  * <p>Same rules as their drawers, applied by their own code (see
  * {@code StorageDrawersContract.fitsAlongside}): 7 slots, storage upgrades stack their multipliers
  * additively, any other kind fits once per group. Only the kinds that mean something for a non-item
- * drawer are accepted: storage, void, creative storage, creative vending.
+ * drawer are accepted: storage, void, creative storage, creative vending, redstone (the fill level,
+ * read as Storage Drawers reads it) and illumination (the light the contents are drawn at).
  *
  * <p>Not this class's job: what a multiplier means in FE or mB (the owning block entity decides),
  * or whether removing an upgrade would spill contents (it asks, see {@link #without(int)}).
@@ -31,7 +32,9 @@ public final class DrawerUpgrades {
         return StorageDrawersContract.storageMultiplier(stack) > 0
                 || StorageDrawersContract.isVoidUpgrade(stack)
                 || StorageDrawersContract.isCreativeStorageUpgrade(stack)
-                || StorageDrawersContract.isCreativeVendingUpgrade(stack);
+                || StorageDrawersContract.isCreativeVendingUpgrade(stack)
+                || StorageDrawersContract.redstoneType(stack) != null
+                || StorageDrawersContract.isIlluminationUpgrade(stack);
     }
 
     public ItemStack get(int slot) {
@@ -86,6 +89,16 @@ public final class DrawerUpgrades {
 
     public boolean hasCreativeVending() {
         return slots.stream().anyMatch(StorageDrawersContract::isCreativeVendingUpgrade);
+    }
+
+    /** The installed redstone upgrade's kind (Storage Drawers' name), or null. One at most: they share a group. */
+    @org.jetbrains.annotations.Nullable
+    public String redstoneType() {
+        return slots.stream().map(StorageDrawersContract::redstoneType).filter(java.util.Objects::nonNull).findFirst().orElse(null);
+    }
+
+    public boolean hasIllumination() {
+        return slots.stream().anyMatch(StorageDrawersContract::isIlluminationUpgrade);
     }
 
     /** Installed upgrades, for dropping them when the block breaks. */
