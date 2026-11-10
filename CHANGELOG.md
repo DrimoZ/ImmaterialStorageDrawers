@@ -4,7 +4,7 @@
 
 ### Added
 - Storage Drawers' keys work on every drawer: the Drawer Key locks fluid and chemical compartments to
-  what they hold (an emptied compartment keeps it, shown as a ghost); Quantify and Shroud hide the
+  what they hold (a padlock on the front; an emptied compartment keeps it, shown as a ghost); Quantify and Shroud hide the
   amount or the contents; the Priority Key orders how controllers fill drawers and the Suspend Key
   holds a drawer back from them; the Personal Key keeps other players out.
 - A framed drawer's inventory icon wears its frame, as the placed block does.

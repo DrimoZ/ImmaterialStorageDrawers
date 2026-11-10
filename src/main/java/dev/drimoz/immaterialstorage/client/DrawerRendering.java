@@ -124,4 +124,23 @@ final class DrawerRendering {
                 .setLight(light)
                 .setNormal(pose, nx, ny, nz);
     }
+
+    private static final net.minecraft.resources.ResourceLocation LOCK =
+            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(dev.drimoz.immaterialstorage.ImmaterialStorage.MOD_ID, "block/lock");
+
+    /**
+     * The padlock of a drawer locked with Storage Drawers' Drawer Key, as Storage Drawers and Immaterial
+     * Drawers show theirs: 2 px, centred on the front frame's top rail, lit like the amounts.
+     */
+    static void drawLock(PoseStack pose, MultiBufferSource buffers) {
+        TextureAtlasSprite sprite = net.minecraft.client.Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(LOCK);
+        VertexConsumer buffer = buffers.getBuffer(RenderType.entityCutoutNoCull(InventoryMenu.BLOCK_ATLAS));
+        PoseStack.Pose last = pose.last();
+        float left = localX(7), right = localX(9), bottom = localY(13), top = localY(15);
+        int light = LightTexture.FULL_BRIGHT;
+        vertex(buffer, last, left, bottom, FRAME_Z, sprite.getU0(), sprite.getV1(), 0xFFFFFFFF, light, 0, 0, -1);
+        vertex(buffer, last, right, bottom, FRAME_Z, sprite.getU1(), sprite.getV1(), 0xFFFFFFFF, light, 0, 0, -1);
+        vertex(buffer, last, right, top, FRAME_Z, sprite.getU1(), sprite.getV0(), 0xFFFFFFFF, light, 0, 0, -1);
+        vertex(buffer, last, left, top, FRAME_Z, sprite.getU0(), sprite.getV0(), 0xFFFFFFFF, light, 0, 0, -1);
+    }
 }
