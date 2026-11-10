@@ -9,6 +9,7 @@ import dev.drimoz.immaterialstorage.StorageDrawersContract;
 import dev.drimoz.immaterialstorage.source.SourceCapabilities;
 import dev.drimoz.immaterialstorage.source.SourceContent;
 import dev.drimoz.immaterialstorage.source.SourceDrawerBlockEntity;
+import dev.drimoz.immaterialstorage.compat.ProbeReadings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
@@ -71,5 +72,15 @@ public final class SourceGameTests {
                     helper.assertValueEqual(controller.receiveSource(over, false), over, "Source spilling into the second drawer");
                 })
                 .thenSucceed();
+    }
+    @GameTest(templateNamespace = NS, template = PLATFORM)
+    public static void theProbesReadTheSource(GameTestHelper helper) {
+        helper.setBlock(DRAWER, SourceContent.SOURCE_DRAWER.get());
+        SourceDrawerBlockEntity drawer = at(helper, DRAWER, SourceDrawerBlockEntity.class);
+        drawer.source().receiveSource(1_234, false);
+        var lines = ProbeReadings.of(drawer, true);
+        helper.assertValueEqual(lines.size(), 1, "probe lines of a Source Drawer, for Jade");
+        helper.assertValueEqual(lines.get(0).stored(), 1_234L, "Source the probes read");
+        helper.succeed();
     }
 }

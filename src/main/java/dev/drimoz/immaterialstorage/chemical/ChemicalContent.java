@@ -4,8 +4,11 @@ import com.jaquadro.minecraft.storagedrawers.api.storage.IControlGroup;
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.StorageDrawersContract;
 import dev.drimoz.immaterialstorage.client.ChemicalClient;
+import dev.drimoz.immaterialstorage.compat.ProbeReadings;
 import dev.drimoz.immaterialstorage.drawer.Compartments;
 import dev.drimoz.immaterialstorage.gametest.ChemicalGameTests;
+import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.IChemicalHandler;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
@@ -59,11 +62,30 @@ public final class ChemicalContent {
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
         modBus.addListener(ChemicalContent::registerCapabilities);
+        ProbeReadings.register(ChemicalContent::probeLines, false);
         modBus.addListener(ChemicalContent::addToCreativeTab);
         modBus.addListener((RegisterGameTestsEvent event) -> event.register(ChemicalGameTests.class));
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ChemicalClient.register(modBus);
         }
+    }
+
+    /** A bar per compartment holding a chemical, on a drawer or a controller, in the chemical's colour. */
+    private static List<ProbeReadings.Line> probeLines(BlockEntity blockEntity) {
+        IChemicalHandler handler = blockEntity instanceof ChemicalDrawerBlockEntity drawer ? drawer.chemicals()
+                : blockEntity instanceof IControlGroup group ? ControllerChemicalHandler.of(group) : null;
+        if (handler == null) {
+            return List.of();
+        }
+        List<ProbeReadings.Line> lines = new java.util.ArrayList<>();
+        for (int i = 0; i < handler.getChemicalTanks(); i++) {
+            ChemicalStack chemical = handler.getChemicalInTank(i);
+            if (!chemical.isEmpty()) {
+                lines.add(new ProbeReadings.Line(chemical.getTextComponent(), chemical.getAmount(),
+                        handler.getChemicalTankCapacity(i), "mB", 0xFF000000 | chemical.getChemicalTint()));
+            }
+        }
+        return lines;
     }
 
     private static void addToCreativeTab(BuildCreativeModeTabContentsEvent event) {

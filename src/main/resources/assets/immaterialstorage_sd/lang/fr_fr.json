@@ -12,5 +12,7 @@
   "tooltip.immaterialstorage_sd.upgrades": "%s amélioration(s) installée(s)",
   "tooltip.immaterialstorage_sd.empty": "Vide",
   "tooltip.immaterialstorage_sd.chemical": "%s : %s / %s mB",
-  "tooltip.immaterialstorage_sd.source": "%s / %s de Source"
+  "tooltip.immaterialstorage_sd.source": "%s / %s de Source",
+  "probe.immaterialstorage_sd.source": "Source :",
+  "config.jade.plugin_immaterialstorage_sd.contents": "Contenu (Immaterial Storage)"
 }

@@ -3,9 +3,12 @@ package dev.drimoz.immaterialstorage.source;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IControlGroup;
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.StorageDrawersContract;
+import com.hollingsworth.arsnouveau.api.source.ISourceCap;
 import dev.drimoz.immaterialstorage.client.SourceClient;
+import dev.drimoz.immaterialstorage.compat.ProbeReadings;
 import dev.drimoz.immaterialstorage.gametest.SourceGameTests;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -51,12 +54,26 @@ public final class SourceContent {
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
         modBus.addListener(SourceContent::registerCapabilities);
+        ProbeReadings.register(SourceContent::probeLines, true);
         modBus.addListener(SourceContent::addToCreativeTab);
         modBus.addListener((RegisterGameTestsEvent event) -> event.register(SourceGameTests.class));
         if (FMLEnvironment.dist == Dist.CLIENT) {
             SourceClient.register(modBus);
         }
     }
+
+    /** The Source of a drawer, or of a controller's whole network, in Source's purple. */
+    private static List<ProbeReadings.Line> probeLines(BlockEntity blockEntity) {
+        ISourceCap source = blockEntity instanceof SourceDrawerBlockEntity drawer ? drawer.source()
+                : blockEntity instanceof IControlGroup group ? ControllerSourceStorage.of(group) : null;
+        if (source == null || source.getSourceCapacity() <= 0) {
+            return List.of();
+        }
+        return List.of(new ProbeReadings.Line(Component.translatable("probe.immaterialstorage_sd.source"),
+                source.getSource(), source.getSourceCapacity(), "", SOURCE_COLOR));
+    }
+
+    private static final int SOURCE_COLOR = 0xFFA45BE0;
 
     private static void addToCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(StorageDrawersContract.CREATIVE_TAB)) {

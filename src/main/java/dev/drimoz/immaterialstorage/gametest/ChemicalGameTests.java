@@ -13,6 +13,7 @@ import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
+import dev.drimoz.immaterialstorage.compat.ProbeReadings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
@@ -107,5 +108,15 @@ public final class ChemicalGameTests {
                             "oxygen refused by the controller");
                 })
                 .thenSucceed();
+    }
+    @GameTest(templateNamespace = NS, template = PLATFORM)
+    public static void theOneProbeReadsEveryChemicalButJadeIsLeftToMekanism(GameTestHelper helper) {
+        helper.setBlock(DRAWER, ChemicalContent.CHEMICAL_DRAWER_2.get());
+        ChemicalDrawerBlockEntity drawer = at(helper, DRAWER, ChemicalDrawerBlockEntity.class);
+        drawer.chemicals().insertChemical(stack("hydrogen", 700), Action.EXECUTE);
+        drawer.chemicals().insertChemical(stack("oxygen", 300), Action.EXECUTE);
+        helper.assertValueEqual(ProbeReadings.of(drawer, false).size(), 2, "chemical lines for The One Probe");
+        helper.assertValueEqual(ProbeReadings.of(drawer, true).size(), 0, "chemical lines for Jade, which Mekanism covers");
+        helper.succeed();
     }
 }

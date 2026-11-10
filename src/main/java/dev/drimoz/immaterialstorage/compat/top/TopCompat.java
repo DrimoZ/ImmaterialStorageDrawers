@@ -3,6 +3,7 @@ package dev.drimoz.immaterialstorage.compat.top;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IControlGroup;
 import dev.drimoz.immaterialstorage.ImmaterialStorage;
 import dev.drimoz.immaterialstorage.compat.EnergyReading;
+import dev.drimoz.immaterialstorage.compat.ProbeReadings;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlockEntity;
 import mcjty.theoneprobe.api.IProbeConfig;
 import mcjty.theoneprobe.api.IProbeConfigProvider;
@@ -26,7 +27,8 @@ import java.util.function.Function;
 
 /**
  * The One Probe's twin of the Jade plugin: TOP's own RF bar, fed the energy in full, for Energy
- * Drawers and the Storage Drawers controllers and slaves that link them.
+ * Drawers and the Storage Drawers controllers and slaves that link them; and a bar per tank for the
+ * contents TOP does not read on its own ({@code ProbeReadings}: chemicals, Source).
  *
  * <p>Only ever loaded when TOP is installed (see the mod entry point). TOP asks every provider and
  * keeps all their lines, so its default RF readout, read from the int capability and wrong past
@@ -59,7 +61,16 @@ public final class TopCompat implements IProbeInfoProvider, IProbeConfigProvider
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, Player player, Level level,
                              BlockState state, IProbeHitData data) {
-        EnergyReading reading = EnergyReading.of(level.getBlockEntity(data.getPos()));
+        BlockEntity blockEntity = level.getBlockEntity(data.getPos());
+        for (ProbeReadings.Line line : ProbeReadings.of(blockEntity, false)) {
+            probeInfo.text(line.label());
+            probeInfo.progress(line.stored(), line.capacity(), probeInfo.defaultProgressStyle()
+                    .suffix(line.unit())
+                    .filledColor(line.color())
+                    .alternateFilledColor(line.color())
+                    .numberFormat(Config.rfFormat.get()));
+        }
+        EnergyReading reading = EnergyReading.of(blockEntity);
         if (reading == null) {
             return;
         }

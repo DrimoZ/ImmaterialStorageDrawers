@@ -16,6 +16,8 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
   a distinct inventory icon each.
 - **Drops keep everything**: a broken drawer keeps its contents and upgrades in the item.
 - **Jade and The One Probe** show the full energy, past the 2.1 billion FE of the standard API.
+- **Probes** for every content: Jade and The One Probe show energy, fluids, chemicals and Source, on
+  drawers and controllers.
 - **Source Drawer** (Ars Nouveau, optional), found by relays, the apparatus and sourcelinks, exposed
   by controllers.
 - **Chemical Drawers** (Mekanism, optional) in 1x1, 1x2 and 2x2, exposed by controllers.
@@ -32,9 +34,7 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
 
 1. **Framed inventory icons.** A framed drawer's item shows the plain icon; drawing the frame on it
    means wrapping the composite item models too.
-2. **Jade / The One Probe for chemicals and Source**: whether the probes show them on their own
-   (through Mekanism's and Ars's capabilities) has not been checked.
-3. **Store page and README**, in the same style as Immaterial Drawers.
+2. **Store page and README**, in the same style as Immaterial Drawers.
 
 ## Considered, not planned
 

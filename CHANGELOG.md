@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- Probes: The One Probe shows a bar per chemical compartment and the Source of Source Drawers, on
+  drawers and on controllers (their whole network); Jade shows Source the same way (Mekanism already
+  shows chemicals in Jade).
 - Source Drawer (with Ars Nouveau installed, optional): 32,000 Source base (configurable), Storage
   Drawers' upgrades included. Relays and turrets reach it through Ars's Source capability; the
   enchanting apparatus, imbuement and sourcelinks find it nearby like a Source Jar; controllers expose

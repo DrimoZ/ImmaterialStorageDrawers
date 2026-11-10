@@ -6,6 +6,8 @@ import dev.drimoz.immaterialstorage.compat.EnergyReading;
 import dev.drimoz.immaterialstorage.energy.EnergyDrawerBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import snownee.jade.api.Accessor;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IWailaClientRegistration;
@@ -27,7 +29,8 @@ import java.util.List;
  * <p>Jade reads the energy capability on its own, but that is an int and stops at 2.1 billion FE.
  * Its {@code registerEnergyStorage} hook feeds the same bar from longs; being registered for these
  * classes, it replaces Jade's own reading there rather than adding a second bar. Fluids need nothing:
- * Jade reads the fluid capability, which is enough.
+ * Jade reads the fluid capability, which is enough; nor do chemicals, which Mekanism shows. Source
+ * gets bars from {@link ReadingsProvider}.
  *
  * <p>Taken from Immaterial Drawers' Jade plugin.
  */
@@ -42,11 +45,13 @@ public class ISJadePlugin implements IWailaPlugin {
         registration.registerEnergyStorage(EnergyExtension.INSTANCE, EnergyDrawerBlockEntity.class);
         StorageDrawersContract.CONTROLLER_CLASSES.forEach(
                 type -> registration.registerEnergyStorage(EnergyExtension.INSTANCE, type));
+        registration.registerBlockDataProvider(ReadingsProvider.INSTANCE, BlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerEnergyStorageClient(EnergyExtension.INSTANCE);
+        registration.registerBlockComponent(ReadingsProvider.INSTANCE, Block.class);
     }
 
     /** Server and client halves of one provider: Jade matches them by {@link #getUid()}. */
