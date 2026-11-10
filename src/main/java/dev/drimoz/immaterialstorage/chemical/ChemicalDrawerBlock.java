@@ -57,6 +57,10 @@ public class ChemicalDrawerBlock extends DrawerBlock {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
+        ItemInteractionResult guarded = guard(stack, level, pos, player);
+        if (guarded != null) {
+            return guarded;
+        }
         IChemicalHandler item = stack.getCapability(ChemicalCapabilities.ITEM);
         if (item == null || !(level.getBlockEntity(pos) instanceof ChemicalDrawerBlockEntity drawer)) {
             return super.useItemOn(stack, state, level, pos, player, hand, hit);
@@ -65,6 +69,12 @@ public class ChemicalDrawerBlock extends DrawerBlock {
             return ItemInteractionResult.SUCCESS;
         }
         int compartment = compartments.at(pos, state.getValue(FACING), hit.getLocation());
+        for (int i = 0; i < item.getChemicalTanks(); i++) {
+            if (!item.getChemicalInTank(i).isEmpty()) {
+                drawer.tanks().get(compartment).assign(item.getChemicalInTank(i));
+                break;
+            }
+        }
         IChemicalHandler tank = new DrawerChemicalTanks(List.of(drawer.tanks().get(compartment)));
         boolean moved = emptyInto(item, tank) || fillFrom(tank, item);
         return moved ? ItemInteractionResult.SUCCESS : ItemInteractionResult.CONSUME;

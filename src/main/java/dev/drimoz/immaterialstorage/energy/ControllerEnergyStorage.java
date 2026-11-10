@@ -49,6 +49,9 @@ public final class ControllerEnergyStorage implements IEnergyStorage {
         // the machine upstream), not an accounting bug.
         int accepted = 0;
         for (EnergyDrawerBlockEntity drawer : drawers()) {
+            if (drawer.attributes().isSuspended()) {
+                continue;
+            }
             accepted += drawer.energy().receiveEnergy(toReceive - accepted, simulate);
             if (accepted >= toReceive) {
                 break;

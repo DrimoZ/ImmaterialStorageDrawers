@@ -87,9 +87,11 @@ public class EnergyDrawerRenderer implements BlockEntityRenderer<EnergyDrawerBlo
 
         pose.pushPose();
         DrawerRendering.faceFront(pose, drawer);
-        renderCube(drawer, partialTicks, pose, buffers, light, combinedOverlay, progress);
+        if (!drawer.attributes().isConcealed()) {
+            renderCube(drawer, partialTicks, pose, buffers, light, combinedOverlay, progress);
+        }
         // stored / capacity: the capacity moves with the upgrades, so stored alone says little.
-        DrawerRendering.drawAmount(font, pose, buffers,
+        if (drawer.attributes().isShowingQuantity()) DrawerRendering.drawAmount(font, pose, buffers,
                 StorageDrawersContract.formatCount(stored) + " / " + StorageDrawersContract.formatCount(capacity) + " FE",
                 Compartments.ONE, 0);
 

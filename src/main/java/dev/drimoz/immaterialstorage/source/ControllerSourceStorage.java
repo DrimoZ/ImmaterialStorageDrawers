@@ -46,7 +46,9 @@ public final class ControllerSourceStorage implements ISourceCap {
     @Override
     public int receiveSource(int toReceive, boolean simulate) {
         int accepted = 0;
-        for (BigSourceStorage drawer : drawers()) {
+        // Storage Drawers' Suspend Key holds a drawer back from filling.
+        for (BigSourceStorage drawer : ControllerNodes.ofNetwork(controller, SourceDrawerBlockEntity.class).stream()
+                .filter(node -> !node.attributes().isSuspended()).map(SourceDrawerBlockEntity::source).toList()) {
             if (accepted >= toReceive) {
                 break;
             }

@@ -1,5 +1,6 @@
 package dev.drimoz.immaterialstorage.network;
 
+import dev.drimoz.immaterialstorage.drawer.DrawerBlockEntity;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IControlGroup;
 
 import java.util.ArrayList;
@@ -64,6 +65,9 @@ public final class ControllerNodes {
                 live.add(kind.cast(node));
             }
         }
+        // Storage Drawers' Priority Key: higher first; stable, so linking order breaks ties.
+        live.sort(java.util.Comparator.comparingInt((T node) -> node instanceof DrawerBlockEntity drawer
+                ? -drawer.attributes().getPriority() : 0));
         return live;
     }
 }

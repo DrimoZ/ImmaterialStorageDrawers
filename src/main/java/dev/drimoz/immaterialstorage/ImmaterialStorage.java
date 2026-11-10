@@ -124,10 +124,12 @@ public final class ImmaterialStorage {
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(StorageDrawersContract.DRAWER_GROUP, ENERGY_DRAWER_BLOCK_ENTITY.get(),
                 (be, context) -> be.node());
+        event.registerBlockEntity(StorageDrawersContract.DRAWER_ATTRIBUTES, ENERGY_DRAWER_BLOCK_ENTITY.get(), (be, context) -> be.attributes());
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ENERGY_DRAWER_BLOCK_ENTITY.get(),
                 (be, side) -> be.energy());
         event.registerBlockEntity(StorageDrawersContract.DRAWER_GROUP, FLUID_DRAWER_BLOCK_ENTITY.get(),
                 (be, context) -> be.node());
+        event.registerBlockEntity(StorageDrawersContract.DRAWER_ATTRIBUTES, FLUID_DRAWER_BLOCK_ENTITY.get(), (be, context) -> be.attributes());
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, FLUID_DRAWER_BLOCK_ENTITY.get(),
                 (be, side) -> be.fluids());
 

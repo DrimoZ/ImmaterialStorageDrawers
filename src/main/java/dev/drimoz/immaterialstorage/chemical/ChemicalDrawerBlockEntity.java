@@ -56,10 +56,25 @@ public class ChemicalDrawerBlockEntity extends DrawerBlockEntity {
             }
 
             @Override
+            public boolean isDrawerLocked() {
+                return attributes().isLocked();
+            }
+
+            @Override
             protected void onChange() {
                 contentChanged();
             }
         };
+    }
+
+    @Override
+    protected boolean supportsLock() {
+        return true;
+    }
+
+    @Override
+    protected void onLockChanged(boolean locked) {
+        tanks.forEach(tank -> tank.lock(locked));
     }
 
     @Override

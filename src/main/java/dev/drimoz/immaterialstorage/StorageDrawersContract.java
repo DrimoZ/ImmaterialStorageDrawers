@@ -2,7 +2,14 @@ package dev.drimoz.immaterialstorage;
 
 import com.jaquadro.minecraft.storagedrawers.api.framing.IFramedBlock;
 import com.jaquadro.minecraft.storagedrawers.api.framing.IFramedMaterials;
+import com.jaquadro.minecraft.storagedrawers.api.security.ISecurityProvider;
+import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
+import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.IProtectable;
+import com.jaquadro.minecraft.storagedrawers.core.ModSecurity;
+import com.jaquadro.minecraft.storagedrawers.item.ItemKeyring;
+import com.jaquadro.minecraft.storagedrawers.item.ItemPersonalKey;
+import com.jaquadro.minecraft.storagedrawers.security.SecurityManager;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.MaterialData;
 import com.jaquadro.minecraft.storagedrawers.block.tile.util.FrameHelper;
 import com.jaquadro.minecraft.storagedrawers.components.item.FrameData;
@@ -21,12 +28,15 @@ import com.jaquadro.minecraft.storagedrawers.util.CountFormatter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 
 import java.util.List;
+import java.util.Optional;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Every point where this mod touches Storage Drawers outside its {@code api} package, in one file.
@@ -185,6 +195,43 @@ public final class StorageDrawersContract {
     /** Replaces the holder's frame; an empty tag clears it. */
     public static void loadFrame(IFramedMaterials frame, HolderLookup.Provider registries, CompoundTag tag) {
         ((MaterialData) frame).read(registries, tag);
+    }
+
+    // --- Keys and security ---
+
+    /**
+     * Storage Drawers' {@code DRAWER_ATTRIBUTES} capability, recreated by name like {@link #DRAWER_GROUP}:
+     * what its keys (lock, quantify, shroud, priority, suspend) ask a block for. Same context class.
+     */
+    public static final BlockCapability<IDrawerAttributes, Void> DRAWER_ATTRIBUTES = BlockCapability.create(
+            ResourceLocation.fromNamespaceAndPath("storagedrawers", "drawer_attributes"),
+            IDrawerAttributes.class, Void.TYPE);
+
+    /** Storage Drawers' own access rule (owner, or the owner's team for the FTB and CoFH keys). */
+    public static boolean hasAccess(Player player, IProtectable target) {
+        return SecurityManager.hasAccess(player, target);
+    }
+
+    public static boolean hasOwnership(Player player, IProtectable target) {
+        return SecurityManager.hasOwnership(player.getGameProfile(), target);
+    }
+
+    /**
+     * The security provider of the Personal Key in hand, directly or on a keyring: "" for the plain key,
+     * "unlock" for the admin key; empty when it is no Personal Key, or Personal Keys are disabled.
+     */
+    public static Optional<String> personalKey(ItemStack stack) {
+        ItemStack key = stack.getItem() instanceof ItemKeyring keyring ? keyring.getKey() : stack;
+        if (key.getItem() instanceof ItemPersonalKey personal && ModCommonConfig.INSTANCE.TOOLS.personalKey.enable.get()) {
+            String provider = personal.getSecurityProviderKey();
+            return Optional.of(provider == null ? "" : provider);
+        }
+        return Optional.empty();
+    }
+
+    @Nullable
+    public static ISecurityProvider securityProvider(String id) {
+        return id == null || id.isEmpty() ? null : ModSecurity.registry.getProvider(id);
     }
 
     // --- Text ---

@@ -35,6 +35,7 @@ public class FluidDrawerBlockEntity extends DrawerBlockEntity {
     private static final String TANKS_TAG = "Tanks";
     private static final String FLUID_TAG = "Fluid";
     private static final String CAPACITY_TAG = "Capacity";
+    private static final String FILTER_TAG = "Filter";
 
     private final Compartments compartments;
     private final List<DrawerFluidTank> tanks;
@@ -61,10 +62,25 @@ public class FluidDrawerBlockEntity extends DrawerBlockEntity {
             }
 
             @Override
+            public boolean isDrawerLocked() {
+                return attributes().isLocked();
+            }
+
+            @Override
             protected void onContentsChanged() {
                 contentChanged();
             }
         };
+    }
+
+    @Override
+    protected boolean supportsLock() {
+        return true;
+    }
+
+    @Override
+    protected void onLockChanged(boolean locked) {
+        tanks.forEach(tank -> tank.lock(locked));
     }
 
     @Override
@@ -118,6 +134,9 @@ public class FluidDrawerBlockEntity extends DrawerBlockEntity {
                 saved.put(FLUID_TAG, tank.getFluid().save(registries));
             }
             saved.putInt(CAPACITY_TAG, tank.getCapacity());
+            if (!tank.getFilter().isEmpty()) {
+                saved.put(FILTER_TAG, tank.getFilter().save(registries));
+            }
             list.add(saved);
         }
         tag.put(TANKS_TAG, list);
@@ -128,6 +147,7 @@ public class FluidDrawerBlockEntity extends DrawerBlockEntity {
         ListTag list = tag.getList(TANKS_TAG, Tag.TAG_COMPOUND);
         for (int i = 0; i < tanks.size(); i++) {
             tanks.get(i).setFluid(FluidStack.parseOptional(registries, list.getCompound(i).getCompound(FLUID_TAG)));
+            tanks.get(i).setFilter(FluidStack.parseOptional(registries, list.getCompound(i).getCompound(FILTER_TAG)));
         }
     }
 

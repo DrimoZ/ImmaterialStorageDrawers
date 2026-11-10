@@ -39,12 +39,12 @@ public class SourceDrawerRenderer implements BlockEntityRenderer<SourceDrawerBlo
 
         pose.pushPose();
         DrawerRendering.faceFront(pose, drawer);
-        if (stored > 0 && capacity > 0) {
+        if (stored > 0 && capacity > 0 && !drawer.attributes().isConcealed()) {
             var sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(SourceClient.SOURCE_TEXTURE);
             DrawerRendering.drawTank(pose, buffers, sprite, SOURCE_COLOR, LightTexture.FULL_BRIGHT,
                     Math.min(1f, stored / (float) capacity), Compartments.ONE, 0);
         }
-        DrawerRendering.drawAmount(font, pose, buffers,
+        if (drawer.attributes().isShowingQuantity()) DrawerRendering.drawAmount(font, pose, buffers,
                 StorageDrawersContract.formatCount(stored) + " / " + StorageDrawersContract.formatCount(capacity), Compartments.ONE, 0);
         pose.popPose();
     }

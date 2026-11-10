@@ -125,6 +125,10 @@ public abstract class DrawerBlock extends NetworkNodeBlock implements IFramedSou
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
+        ItemInteractionResult guarded = guard(stack, level, pos, player);
+        if (guarded != null) {
+            return guarded;
+        }
         if (!DrawerUpgrades.isAccepted(stack) || !(level.getBlockEntity(pos) instanceof DrawerBlockEntity drawer)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
@@ -142,6 +146,10 @@ public abstract class DrawerBlock extends NetworkNodeBlock implements IFramedSou
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (level.getBlockEntity(pos) instanceof DrawerBlockEntity protectedDrawer
+                && !StorageDrawersContract.hasAccess(player, protectedDrawer)) {
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
         if (!player.isShiftKeyDown() || !(level.getBlockEntity(pos) instanceof DrawerBlockEntity drawer)) {
             return InteractionResult.PASS;
         }
@@ -150,6 +158,41 @@ public abstract class DrawerBlock extends NetworkNodeBlock implements IFramedSou
                     (id, inventory, opener) -> new DrawerMenu(id, inventory, drawer), getName()), pos);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    /**
+     * Storage Drawers' Personal Key and its access rule, as on its own drawers: a drawer someone else
+     * owns refuses every click (the admin "unlock" key frees it), and a Personal Key claims an
+     * unowned drawer or frees one's own. Returns the click's result, or null when the click goes on.
+     * Subclasses call it first.
+     */
+    @Nullable
+    protected ItemInteractionResult guard(ItemStack stack, Level level, BlockPos pos, Player player) {
+        if (!(level.getBlockEntity(pos) instanceof DrawerBlockEntity drawer)) {
+            return null;
+        }
+        java.util.Optional<String> key = StorageDrawersContract.personalKey(stack);
+        boolean unlock = key.filter("unlock"::equals).isPresent();
+        if (!StorageDrawersContract.hasAccess(player, drawer)) {
+            if (unlock && !level.isClientSide) {
+                drawer.setOwner(null);
+                drawer.setSecurityProvider(null);
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
+        if (key.isEmpty()) {
+            return null;
+        }
+        if (!level.isClientSide) {
+            if (unlock || (drawer.getOwner() != null && StorageDrawersContract.hasOwnership(player, drawer))) {
+                drawer.setOwner(null);
+                drawer.setSecurityProvider(null);
+            } else if (drawer.getOwner() == null) {
+                drawer.setOwner(player.getUUID());
+                drawer.setSecurityProvider(StorageDrawersContract.securityProvider(key.get()));
+            }
+        }
+        return ItemInteractionResult.sidedSuccess(level.isClientSide);
     }
 
     @Override

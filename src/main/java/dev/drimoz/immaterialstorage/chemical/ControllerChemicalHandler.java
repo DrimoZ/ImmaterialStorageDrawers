@@ -36,6 +36,13 @@ public final class ControllerChemicalHandler implements IChemicalHandler {
                 .flatMap(drawer -> drawer.tanks().stream()).toList());
     }
 
+    /** Where filling goes: every drawer but those Storage Drawers' Suspend Key holds back. */
+    private DrawerChemicalTanks fillable() {
+        return new DrawerChemicalTanks(ControllerNodes.ofNetwork(controller, ChemicalDrawerBlockEntity.class).stream()
+                .filter(drawer -> !drawer.attributes().isSuspended())
+                .flatMap(drawer -> drawer.tanks().stream()).toList());
+    }
+
     @Override
     public int getChemicalTanks() {
         return network().getChemicalTanks();
@@ -73,7 +80,7 @@ public final class ControllerChemicalHandler implements IChemicalHandler {
 
     @Override
     public ChemicalStack insertChemical(ChemicalStack stack, Action action) {
-        return network().insertChemical(stack, action);
+        return fillable().insertChemical(stack, action);
     }
 
     @Override

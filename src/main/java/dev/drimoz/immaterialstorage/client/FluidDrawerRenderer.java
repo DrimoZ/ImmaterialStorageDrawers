@@ -26,6 +26,9 @@ import net.neoforged.neoforge.fluids.FluidStack;
  */
 public class FluidDrawerRenderer implements BlockEntityRenderer<FluidDrawerBlockEntity> {
 
+    /** A locked, empty compartment's pin: seen, but plainly not there. */
+    static final int GHOST_ALPHA = 0x4D;
+
     private final Font font;
 
     public FluidDrawerRenderer(Font font) {
@@ -46,8 +49,17 @@ public class FluidDrawerRenderer implements BlockEntityRenderer<FluidDrawerBlock
         for (int i = 0; i < compartments.count(); i++) {
             FluidStack fluid = drawer.tanks().get(i).getFluid();
             int capacity = drawer.tanks().get(i).getCapacity();
-            if (!fluid.isEmpty() && capacity > 0) {
-                renderFluid(pose, buffers, fluid, Math.min(1f, fluid.getAmount() / (float) capacity), light, compartments, i);
+            FluidStack pin = drawer.tanks().get(i).getFilter();
+            if (drawer.attributes().isConcealed()) {
+                // Shroud Key: nothing of the contents on the front.
+            } else if (!fluid.isEmpty() && capacity > 0) {
+                renderFluid(pose, buffers, fluid, Math.min(1f, fluid.getAmount() / (float) capacity), light, compartments, i, false);
+            } else if (!pin.isEmpty()) {
+                // Locked and empty: a ghost of what goes there, as Storage Drawers shows a locked drawer's item.
+                renderFluid(pose, buffers, pin, 1f, light, compartments, i, true);
+            }
+            if (!drawer.attributes().isShowingQuantity()) {
+                continue;
             }
             // One compartment says stored / capacity; smaller ones have room for the amount only.
             String amount = StorageDrawersContract.formatCount(fluid.getAmount());
@@ -58,7 +70,7 @@ public class FluidDrawerRenderer implements BlockEntityRenderer<FluidDrawerBlock
     }
 
     private static void renderFluid(PoseStack pose, MultiBufferSource buffers, FluidStack fluid, float progress, int light,
-                                    Compartments compartments, int compartment) {
+                                    Compartments compartments, int compartment, boolean ghost) {
         IClientFluidTypeExtensions client = IClientFluidTypeExtensions.of(fluid.getFluid());
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
                 .apply(client.getStillTexture(fluid));
@@ -66,6 +78,10 @@ public class FluidDrawerRenderer implements BlockEntityRenderer<FluidDrawerBlock
         if (glow > 0) {
             light = LightTexture.pack(Math.max(LightTexture.block(light), glow), LightTexture.sky(light));
         }
-        DrawerRendering.drawTank(pose, buffers, sprite, client.getTintColor(fluid), light, progress, compartments, compartment);
+        int color = client.getTintColor(fluid);
+        if (ghost) {
+            color = GHOST_ALPHA << 24 | color & 0xFFFFFF;
+        }
+        DrawerRendering.drawTank(pose, buffers, sprite, color, light, progress, compartments, compartment);
     }
 }

@@ -47,16 +47,25 @@ public class ChemicalDrawerRenderer implements BlockEntityRenderer<ChemicalDrawe
         for (int i = 0; i < compartments.count(); i++) {
             ChemicalStack chemical = drawer.tanks().get(i).getChemical();
             long capacity = drawer.tanks().get(i).getCapacity();
-            if (!chemical.isEmpty() && capacity > 0) {
+            ChemicalStack pin = drawer.tanks().get(i).getFilter();
+            boolean ghost = chemical.isEmpty() && !pin.isEmpty();
+            if (ghost) {
+                chemical = pin;
+            }
+            if (!drawer.attributes().isConcealed() && !chemical.isEmpty() && capacity > 0) {
                 boolean gas = chemical.getChemical().isGaseous();
                 TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
                         .apply(chemical.getChemical().getIcon());
-                int color = (gas ? GAS_ALPHA : 0xFF) << 24 | chemical.getChemicalTint() & 0xFFFFFF;
-                float progress = (float) Math.min(1d, chemical.getAmount() / (double) capacity);
+                int alpha = ghost ? FluidDrawerRenderer.GHOST_ALPHA : gas ? GAS_ALPHA : 0xFF;
+                int color = alpha << 24 | chemical.getChemicalTint() & 0xFFFFFF;
+                float progress = ghost ? 1f : (float) Math.min(1d, chemical.getAmount() / (double) capacity);
                 DrawerRendering.drawTank(pose, buffers, sprite, color, gas ? LightTexture.FULL_BRIGHT : light,
                         progress, compartments, i);
             }
-            String amount = StorageDrawersContract.formatCount(chemical.getAmount());
+            if (!drawer.attributes().isShowingQuantity()) {
+                continue;
+            }
+            String amount = StorageDrawersContract.formatCount(ghost ? 0 : chemical.getAmount());
             DrawerRendering.drawAmount(font, pose, buffers, compartments.count() == 1
                     ? amount + " / " + StorageDrawersContract.formatCount(capacity) + " mB" : amount + " mB", compartments, i);
         }

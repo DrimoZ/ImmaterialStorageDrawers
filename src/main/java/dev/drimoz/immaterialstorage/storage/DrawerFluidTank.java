@@ -11,6 +11,8 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
  *   <li><b>Void</b> reports all of a fluid it could hold as accepted and drops what does not fit,
  *       so the pump feeding it never stalls. A different fluid is still refused.</li>
  *   <li><b>Vending</b> hands out whatever is asked for without draining.</li>
+ *   <li><b>Locked</b> (Storage Drawers' Drawer Key) takes only its pinned fluid, and keeps the pin when
+ *       emptied.</li>
  * </ul>
  */
 public class DrawerFluidTank extends FluidTank {
@@ -25,6 +27,42 @@ public class DrawerFluidTank extends FluidTank {
 
     public boolean isDrawerVending() {
         return false;
+    }
+
+    /** Whether the drawer's Drawer Key lock is on: only the pinned fluid goes in, and stays pinned when emptied. */
+    public boolean isDrawerLocked() {
+        return false;
+    }
+
+    private FluidStack filter = FluidStack.EMPTY;
+
+    /** The fluid this compartment is pinned to while locked; empty when it is not. */
+    public FluidStack getFilter() {
+        return filter;
+    }
+
+    public void setFilter(FluidStack filter) {
+        this.filter = filter.isEmpty() ? FluidStack.EMPTY : filter.copyWithAmount(1);
+    }
+
+    /** The lock was set or lifted: pin what is held, or forget it. */
+    public void lock(boolean locked) {
+        setFilter(locked ? fluid : FluidStack.EMPTY);
+    }
+
+    /** A player fills a locked, empty, unpinned compartment by hand: it takes that fluid as its pin. */
+    public void assign(FluidStack stack) {
+        if (isDrawerLocked() && filter.isEmpty() && fluid.isEmpty()) {
+            setFilter(stack);
+        }
+    }
+
+    @Override
+    public boolean isFluidValid(FluidStack stack) {
+        if (isDrawerLocked() && (filter.isEmpty() || !FluidStack.isSameFluidSameComponents(filter, stack))) {
+            return false;
+        }
+        return super.isFluidValid(stack);
     }
 
     @Override

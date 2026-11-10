@@ -16,6 +16,7 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
   a distinct inventory icon each.
 - **Drops keep everything**: a broken drawer keeps its contents and upgrades in the item.
 - **Jade and The One Probe** show the full energy, past the 2.1 billion FE of the standard API.
+- **Storage Drawers' keys** on every drawer: lock, quantify, shroud, priority, suspend, personal.
 - **Probes** for every content: Jade and The One Probe show energy, fluids, chemicals and Source, on
   drawers and controllers.
 - **Source Drawer** (Ars Nouveau, optional), found by relays, the apparatus and sourcelinks, exposed
@@ -38,9 +39,6 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
 
 ## Considered, not planned
 
-- **Fluid lock** (an emptied drawer keeping its fluid assignment, like Storage Drawers' item lock):
-  only if players ask.
-- **Ownership and security** (Storage Drawers' personal keys): only if players ask.
 - **Faster linking.** A drawer placed next to an existing controller joins at the controller's next
   periodic rebuild, up to 5 seconds later. Storage Drawers' own drawers do exactly the same, so this
   stays as it is.

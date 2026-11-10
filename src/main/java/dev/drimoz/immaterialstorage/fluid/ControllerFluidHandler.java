@@ -39,6 +39,13 @@ public final class ControllerFluidHandler implements IFluidHandler {
                 .flatMap(drawer -> drawer.tanks().stream()).toList());
     }
 
+    /** Where filling goes: every drawer but those Storage Drawers' Suspend Key holds back. */
+    private DrawerFluidTanks fillable() {
+        return new DrawerFluidTanks(ControllerNodes.ofNetwork(controller, FluidDrawerBlockEntity.class).stream()
+                .filter(drawer -> !drawer.attributes().isSuspended())
+                .flatMap(drawer -> drawer.tanks().stream()).toList());
+    }
+
     @Override
     public int getTanks() {
         return network().getTanks();
@@ -61,7 +68,7 @@ public final class ControllerFluidHandler implements IFluidHandler {
 
     @Override
     public int fill(FluidStack resource, FluidAction action) {
-        return network().fill(resource, action);
+        return fillable().fill(resource, action);
     }
 
     @Override

@@ -22,6 +22,7 @@ import net.minecraft.nbt.Tag;
 public class DrawerChemicalTank {
 
     private static final String CHEMICAL_TAG = "Chemical";
+    private static final String FILTER_TAG = "Filter";
 
     private ChemicalStack stored = ChemicalStack.EMPTY;
     private long capacity;
@@ -36,6 +37,33 @@ public class DrawerChemicalTank {
 
     public boolean isDrawerVending() {
         return false;
+    }
+
+    /** Whether the drawer's Drawer Key lock is on: only the pinned chemical goes in. */
+    public boolean isDrawerLocked() {
+        return false;
+    }
+
+    private ChemicalStack filter = ChemicalStack.EMPTY;
+
+    public ChemicalStack getFilter() {
+        return filter;
+    }
+
+    public void setFilter(ChemicalStack filter) {
+        this.filter = filter.isEmpty() ? ChemicalStack.EMPTY : filter.copyWithAmount(1);
+    }
+
+    /** The lock was set or lifted: pin what is held, or forget it. */
+    public void lock(boolean locked) {
+        setFilter(locked ? stored : ChemicalStack.EMPTY);
+    }
+
+    /** A player fills a locked, empty, unpinned compartment by hand: it takes that chemical as its pin. */
+    public void assign(ChemicalStack stack) {
+        if (isDrawerLocked() && filter.isEmpty() && stored.isEmpty()) {
+            setFilter(stack);
+        }
     }
 
     /** Called whenever what is stored changes. */
@@ -65,6 +93,9 @@ public class DrawerChemicalTank {
 
     /** Whether this compartment may take this chemical: not refused by the pack, and the one it holds. */
     public boolean isValid(ChemicalStack stack) {
+        if (isDrawerLocked() && (filter.isEmpty() || !ChemicalStack.isSameChemical(filter, stack))) {
+            return false;
+        }
         return !stack.isEmpty() && !stack.is(ChemicalCapabilities.DENYLIST)
                 && (stored.isEmpty() || ChemicalStack.isSameChemical(stored, stack));
     }
@@ -122,12 +153,17 @@ public class DrawerChemicalTank {
         if (!stored.isEmpty()) {
             tag.put(CHEMICAL_TAG, stored.save(registries));
         }
+        if (!filter.isEmpty()) {
+            tag.put(FILTER_TAG, filter.save(registries));
+        }
         return tag;
     }
 
     /** A chemical whose mod left the pack comes back empty rather than failing the drawer. */
     public void load(HolderLookup.Provider registries, CompoundTag tag) {
         stored = read(registries, tag);
+        filter = tag.contains(FILTER_TAG, Tag.TAG_COMPOUND)
+                ? ChemicalStack.parseOptional(registries, tag.getCompound(FILTER_TAG)) : ChemicalStack.EMPTY;
     }
 
     public static ChemicalStack read(HolderLookup.Provider registries, CompoundTag tag) {

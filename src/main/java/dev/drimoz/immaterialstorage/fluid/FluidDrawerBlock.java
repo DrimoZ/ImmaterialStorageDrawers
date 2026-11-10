@@ -54,9 +54,14 @@ public class FluidDrawerBlock extends DrawerBlock {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
+        ItemInteractionResult guarded = guard(stack, level, pos, player);
+        if (guarded != null) {
+            return guarded;
+        }
         if (stack.getCapability(Capabilities.FluidHandler.ITEM) != null
                 && level.getBlockEntity(pos) instanceof FluidDrawerBlockEntity drawer) {
             int compartment = compartments.at(pos, state.getValue(FACING), hit.getLocation());
+            FluidUtil.getFluidContained(stack).ifPresent(drawer.tanks().get(compartment)::assign);
             return FluidUtil.interactWithFluidHandler(player, hand, drawer.tanks().get(compartment))
                     ? ItemInteractionResult.sidedSuccess(level.isClientSide)
                     : ItemInteractionResult.CONSUME;

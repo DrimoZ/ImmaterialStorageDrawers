@@ -3,6 +3,8 @@ package dev.drimoz.immaterialstorage.drawer;
 import com.jaquadro.minecraft.storagedrawers.api.framing.FrameMaterial;
 import com.jaquadro.minecraft.storagedrawers.api.framing.IFramedBlockEntity;
 import com.jaquadro.minecraft.storagedrawers.api.framing.IFramedMaterials;
+import com.jaquadro.minecraft.storagedrawers.api.security.ISecurityProvider;
+import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.IProtectable;
 import dev.drimoz.immaterialstorage.StorageDrawersContract;
 import dev.drimoz.immaterialstorage.network.NetworkNodeBlockEntity;
 import dev.drimoz.immaterialstorage.upgrade.DrawerUpgrades;
@@ -22,18 +24,23 @@ import net.neoforged.neoforge.client.model.data.ModelProperty;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * What every drawer of ours shares, whatever it stores: Storage Drawers' upgrades, its frame (from
- * Storage Drawers' framing table), saving, and the client sync.
+ * Storage Drawers' framing table), what its keys set ({@link DrawerAttributes}, and the owner of the
+ * Personal Key), saving, and the client sync.
  *
  * <p>Subclasses own the content (energy, fluid) and say how upgrades size it. Not this class's job:
  * any unit, any capability.
  */
-public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity implements IFramedBlockEntity {
+public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity implements IFramedBlockEntity, IProtectable {
 
     private static final String UPGRADES_TAG = "Upgrades";
     private static final String FRAME_TAG = "Frame";
+    private static final String ATTRIBUTES_TAG = "Attributes";
+    private static final String OWNER_TAG = "Owner";
+    private static final String SECURITY_TAG = "Security";
 
     /** The frame's look, for the block model; absent when the drawer is not framed. */
     public static final ModelProperty<FrameLook> FRAME_LOOK = new ModelProperty<>();
@@ -53,6 +60,12 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity implement
 
     private final DrawerUpgrades upgrades = new DrawerUpgrades();
     private final IFramedMaterials frame = StorageDrawersContract.newFrame();
+    private final DrawerAttributes attributes = new DrawerAttributes(supportsLock(), this::attributesChanged);
+    private boolean wasLocked;
+    @Nullable
+    private UUID owner;
+    @Nullable
+    private ISecurityProvider securityProvider;
     private boolean syncPending;
 
     protected DrawerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -102,6 +115,58 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity implement
         return tag;
     }
 
+    /** What Storage Drawers' keys change; also what the drawer answers to their attributes capability. */
+    public DrawerAttributes attributes() {
+        return attributes;
+    }
+
+    /** Whether the Drawer Key locks this drawer: drawers with compartments, whose contents can be pinned. */
+    protected boolean supportsLock() {
+        return false;
+    }
+
+    /** The lock was set or lifted: compartments pin what they hold, or forget it. */
+    protected void onLockChanged(boolean locked) {
+    }
+
+    private void attributesChanged() {
+        if (attributes.isLocked() != wasLocked) {
+            wasLocked = attributes.isLocked();
+            onLockChanged(wasLocked);
+        }
+        setChanged();
+        syncNow();
+    }
+
+    // Storage Drawers' Personal Key: IProtectable, checked through its own SecurityManager.
+
+    @Override
+    @Nullable
+    public UUID getOwner() {
+        return owner;
+    }
+
+    @Override
+    public boolean setOwner(@Nullable UUID owner) {
+        this.owner = owner;
+        setChanged();
+        syncNow();
+        return true;
+    }
+
+    @Override
+    @Nullable
+    public ISecurityProvider getSecurityProvider() {
+        return securityProvider;
+    }
+
+    @Override
+    public boolean setSecurityProvider(@Nullable ISecurityProvider provider) {
+        this.securityProvider = provider;
+        setChanged();
+        return true;
+    }
+
     /** How the front is divided; one compartment unless a drawer says otherwise. */
     public Compartments compartments() {
         return Compartments.ONE;
@@ -131,7 +196,7 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity implement
 
     /** Nothing worth keeping in the dropped item. */
     public boolean isEmpty() {
-        return isContentEmpty() && upgrades.installed().isEmpty();
+        return isContentEmpty() && upgrades.installed().isEmpty() && attributes.isDefault() && owner == null;
     }
 
     /** Installs one upgrade from the stack in the first slot that takes it (the caller shrinks it). */
@@ -214,6 +279,13 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity implement
         super.saveAdditional(tag, registries);
         saveContent(tag, registries);
         tag.put(UPGRADES_TAG, upgrades.save(registries));
+        tag.put(ATTRIBUTES_TAG, attributes.save());
+        if (owner != null) {
+            tag.putUUID(OWNER_TAG, owner);
+            if (securityProvider != null) {
+                tag.putString(SECURITY_TAG, securityProvider.getProviderID());
+            }
+        }
         if (StorageDrawersContract.isFramed(frame)) {
             tag.put(FRAME_TAG, StorageDrawersContract.saveFrame(frame, registries));
         }
@@ -224,6 +296,10 @@ public abstract class DrawerBlockEntity extends NetworkNodeBlockEntity implement
         super.loadAdditional(tag, registries);
         loadContent(tag, registries);
         upgrades.load(registries, tag.getList(UPGRADES_TAG, Tag.TAG_COMPOUND));
+        attributes.load(tag.getCompound(ATTRIBUTES_TAG));
+        wasLocked = attributes.isLocked();
+        owner = tag.hasUUID(OWNER_TAG) ? tag.getUUID(OWNER_TAG) : null;
+        securityProvider = StorageDrawersContract.securityProvider(tag.getString(SECURITY_TAG));
         // Recomputed rather than trusted: the multipliers live in Storage Drawers' config, which can
         // change between sessions.
         applyUpgrades();

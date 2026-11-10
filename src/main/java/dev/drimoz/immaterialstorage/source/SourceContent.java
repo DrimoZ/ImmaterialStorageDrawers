@@ -84,6 +84,7 @@ public final class SourceContent {
     @SuppressWarnings("unchecked")
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(StorageDrawersContract.DRAWER_GROUP, BLOCK_ENTITY.get(), (be, context) -> be.node());
+        event.registerBlockEntity(StorageDrawersContract.DRAWER_ATTRIBUTES, BLOCK_ENTITY.get(), (be, context) -> be.attributes());
         event.registerBlockEntity(SourceCapabilities.BLOCK, BLOCK_ENTITY.get(), (be, side) -> be.source());
         for (var name : List.of(StorageDrawersContract.CONTROLLER_BLOCK_ENTITY, StorageDrawersContract.CONTROLLER_IO_BLOCK_ENTITY)) {
             BlockEntityType<?> type = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(name);
