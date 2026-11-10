@@ -33,7 +33,8 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
 
 ## Next
 
-1. **Store page and README**, in the same style as Immaterial Drawers.
+1. **Store images**: the README and the store text (`STORE.md`) are written; the banner, the
+   section headers and the captures without HUD, in Immaterial Drawers' style, are still to make.
 
 ## Considered, not planned
 
