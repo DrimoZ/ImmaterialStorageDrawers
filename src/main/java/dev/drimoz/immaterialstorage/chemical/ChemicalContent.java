@@ -62,7 +62,7 @@ public final class ChemicalContent {
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
         modBus.addListener(ChemicalContent::registerCapabilities);
-        ProbeReadings.register(ChemicalContent::probeLines, false);
+        ProbeReadings.register(ChemicalContent::probeLines, true);
         modBus.addListener(ChemicalContent::addToCreativeTab);
         modBus.addListener((RegisterGameTestsEvent event) -> event.register(ChemicalGameTests.class));
         if (FMLEnvironment.dist == Dist.CLIENT) {

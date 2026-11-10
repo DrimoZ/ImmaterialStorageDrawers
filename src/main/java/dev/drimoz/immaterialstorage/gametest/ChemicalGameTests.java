@@ -110,13 +110,13 @@ public final class ChemicalGameTests {
                 .thenSucceed();
     }
     @GameTest(templateNamespace = NS, template = PLATFORM)
-    public static void theOneProbeReadsEveryChemicalButJadeIsLeftToMekanism(GameTestHelper helper) {
+    public static void theProbesReadEveryChemicalCompartment(GameTestHelper helper) {
         helper.setBlock(DRAWER, ChemicalContent.CHEMICAL_DRAWER_2.get());
         ChemicalDrawerBlockEntity drawer = at(helper, DRAWER, ChemicalDrawerBlockEntity.class);
         drawer.chemicals().insertChemical(stack("hydrogen", 700), Action.EXECUTE);
         drawer.chemicals().insertChemical(stack("oxygen", 300), Action.EXECUTE);
         helper.assertValueEqual(ProbeReadings.of(drawer, false).size(), 2, "chemical lines for The One Probe");
-        helper.assertValueEqual(ProbeReadings.of(drawer, true).size(), 0, "chemical lines for Jade, which Mekanism covers");
+        helper.assertValueEqual(ProbeReadings.of(drawer, true).size(), 2, "chemical lines for Jade, which replace Mekanism's");
         helper.succeed();
     }
 }

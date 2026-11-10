@@ -16,8 +16,8 @@ import java.util.function.Function;
  * name a Mekanism or Ars Nouveau class and load whatever is installed. Energy and fluids are not
  * here: the probes read those themselves (energy through {@link EnergyReading}).
  *
- * <p>A reader says whether Jade needs it: Mekanism already shows chemicals in Jade, so chemical lines
- * go to The One Probe only.
+ * <p>A reader says whether Jade shows it too; every reader does today (on our blocks Jade's own
+ * chemical bars, drawn by Mekanism, are replaced by ours: see the Jade provider).
  */
 public final class ProbeReadings {
 
