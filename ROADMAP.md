@@ -37,10 +37,10 @@ Ordered, not scheduled. Nothing here is promised until it has run in a game test
 
 ## Next
 
-1. **Store images**: the README and the store text (`STORE.md`) are written; the banner, the
-   section headers and the captures without HUD, in Immaterial Drawers' style, are still to make.
-2. **Release check**: the built jar in a normal launcher instance, with and without Mekanism and
-   Ars Nouveau; then the version number and a dated changelog section.
+1. **Publish 0.1.0**: the jar has run on a dedicated NeoForge server with Storage Drawers alone and
+   with Mekanism and Ars Nouveau; the store text and the banner and headers are in. Left: the
+   CurseForge and Modrinth projects, the `framed` and `upgrade_screen` gallery shots, and a run in a
+   player's launcher instance.
 
 ## Considered, not planned
 

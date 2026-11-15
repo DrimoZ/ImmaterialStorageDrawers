@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.1.0 - 2026-11-15
+
+First public beta, for Minecraft 1.21.1 and NeoForge, with Storage Drawers 13.11.4 or later.
 
 ### Fixed
 - Without Mekanism or Ars Nouveau, the server log no longer reports the loot tables of the Chemical
