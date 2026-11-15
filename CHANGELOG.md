@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+- Without Mekanism or Ars Nouveau, the server log no longer reports the loot tables of the Chemical
+  and Source Drawers as unparsable: they now load only with their mod.
+
 ### Added
 - Storage Drawers' redstone upgrades (combined, max, min) on every drawer: a comparator reads how
   full it is, compartments counted as Storage Drawers counts its drawers, and its "analogOutput"
