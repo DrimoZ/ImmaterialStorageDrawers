@@ -8,8 +8,9 @@ Images live in `docs/store-art/` and the description links them from GitHub
 (`raw.githubusercontent.com`, `main`), never from the description editor: an image uploaded there
 joins the CurseForge gallery.
 
-**Images still to make** (none is in `docs/store-art/` yet): the banner and the section headers, in
-Immaterial Drawers' style, and the captures, taken without HUD. Their file names are fixed below.
+The banner and the six section headers are in `docs/store-art/`, in Immaterial Drawers' style:
+a screenshot taken with shaders, and text in Minecraft's own font. Still to do by hand: the `framed`
+and `upgrade_screen` gallery shots.
 
 ## Name
 
