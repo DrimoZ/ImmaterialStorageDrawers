@@ -1,0 +1,87 @@
+name: Compatibility issue
+description: A cable, pipe, machine, generator or probe from another mod does not work with an Immaterial Storage drawer.
+title: "[Compat] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The drawers use the standard capabilities of NeoForge and of the mods they support, so most mods should connect without anything special. When one does not, the details below tell us whether the problem is ours, the other mod's, or the capability itself.
+
+        **A known limit, not a bug:** the standard energy capability is a 32-bit number, so cables and most machines read at most 2,147,483,647 FE from one block, even when the drawer holds more. Jade, The One Probe and the drawer front show the real total.
+
+  - type: input
+    id: other-mod
+    attributes:
+      label: Which mod, and which version?
+      placeholder: Mekanism 10.7.19.85
+    validations:
+      required: true
+
+  - type: input
+    id: block
+    attributes:
+      label: Which block or item from that mod?
+      placeholder: Ultimate Universal Cable
+    validations:
+      required: true
+
+  - type: dropdown
+    id: drawer
+    attributes:
+      label: Which drawer?
+      options:
+        - Energy Drawer
+        - Fluid Drawer
+        - Chemical Drawer
+        - Source Drawer
+    validations:
+      required: true
+
+  - type: dropdown
+    id: direction
+    attributes:
+      label: What goes wrong?
+      options:
+        - It does not connect to the drawer at all
+        - It connects, but nothing goes into the drawer
+        - It connects, but nothing comes out of the drawer
+        - The amount shown is wrong
+        - The game crashes or errors
+        - Something else
+    validations:
+      required: true
+
+  - type: dropdown
+    id: through-controller
+    attributes:
+      label: Is the drawer linked to a Controller?
+      description: Tell us whether the cable or pipe is on the drawer itself or on the controller.
+      options:
+        - No, it is on the drawer
+        - Yes, it is on the Drawer Controller
+        - Yes, it is on a Controller Slave
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What you built, what you expected, what happened. A screenshot of the setup helps a lot.
+    validations:
+      required: true
+
+  - type: input
+    id: versions
+    attributes:
+      label: Immaterial Storage, Storage Drawers and NeoForge versions
+      placeholder: 0.1.0+1.21.1, SD 1.21.1-13.11.4, NeoForge 21.1.248
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Upload `logs/latest.log` to [mclo.gs](https://mclo.gs) and paste the link, if anything was logged.
