@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: README
+    url: https://github.com/DrimoZ/ImmaterialStorageDrawers#readme
+    about: How the drawers work, what they need, and the config options.
+  - name: A bug in Storage Drawers itself
+    url: https://github.com/jaquadro/StorageDrawers/issues
+    about: If it also happens with Storage Drawers' own drawers and without this mod, it belongs there.
+  - name: You use Functional Storage, not Storage Drawers
+    url: https://github.com/DrimoZ/ImmaterialDrawers/issues
+    about: Immaterial Drawers is the sibling mod for Functional Storage and has its own issue tracker.
+  - name: CurseForge page
+    url: https://www.curseforge.com/minecraft/mc-mods/immaterial-storage-sd
+    about: Downloads, screenshots and the changelog.
